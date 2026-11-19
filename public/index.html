@@ -94,20 +94,75 @@
   .det table th, .det table td { padding: 6px 8px; font-size: 13px; }
   .det .kv2 { display: grid; grid-template-columns: 130px 1fr; gap: 4px 12px; margin-top: 10px; }
   .det .kv2 div:nth-child(odd) { color: var(--muted); }
-</style>
+  /* ─── Acceso ─── */
+  #login { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--bg); }
+  #login .box { width: 100%; max-width: 380px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+  #login h1 { font-size: 20px; margin: 0 0 4px; }
+  #login h1 span { color: var(--brand); }
+  #login p.meta { margin: 0 0 20px; }
+  #login label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+  #login input[type=text], #login input[type=password] { font-size: 16px; padding: 10px 12px; }
+  #login button.primary { width: 100%; margin-top: 18px; padding: 11px; font-size: 15px; font-weight: 600; }
+  #login .err { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 10px; }
+  #login .lock { width: 44px; height: 44px; border-radius: 12px; background: var(--brand-soft); display: grid; place-items: center; margin-bottom: 14px; }
+  input[type=password] { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; font: inherit; background: #fff; color: var(--ink); }
+  th.num { text-align: right; }
+  .det .acc { margin-top: 14px; display: flex; align-items: center; gap: 12px; }
+  #app { display: none; }
+  body.dentro #login { display: none; } body.dentro #app { display: block; }
+  .user { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  /* ─── Órdenes de compra ─── */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); }
+  .kpi { background: var(--panel); padding: 12px 16px; }
+  .kpi b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 12px; color: var(--muted); }
+  .octable { width: 100%; }
+  .octable tbody tr.fila { cursor: pointer; }
+  .octable tbody tr.fila:hover { background: #fafbf9; }
+  .octable td { font-size: 13.5px; }
+  .est { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--bg); color: var(--muted); }
+  .est.e-ok { background: var(--brand-soft); color: var(--brand); }
+  .est.e-pend { background: var(--warn-soft); color: var(--warn); }
+  .est.e-rec { background: #e8f1fb; color: #1d4f8a; }
+  .est.e-can { background: var(--danger-soft); color: var(--danger); }
+  tr.detfila td { background: #fafbf9; padding: 0; }
+  tr.detfila .det { border: 0; border-radius: 0; border-bottom: 1px solid var(--line); }
+  .tabla-scroll { overflow-x: auto; }
+  @media (max-width: 860px) { .octable .opc { display: none; } }
 </style>
 </head>
 <body>
+
+<!-- ─── ACCESO ─── -->
+<section id="login">
+  <form class="box" id="formLogin" autocomplete="on">
+    <div class="lock"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0b6b3a" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+    <h1>Compras Ágiles <span>· acceso</span></h1>
+    <p class="meta">Ingresa con el usuario y la clave que te entregaron.</p>
+    <label for="lUsuario">Usuario</label>
+    <input type="text" id="lUsuario" name="username" autocomplete="username" autocapitalize="none" required>
+    <label for="lClave">Clave</label>
+    <input type="password" id="lClave" name="password" autocomplete="current-password" required>
+    <label class="check" style="font-weight:400"><input type="checkbox" id="lRecordar"> Recordarme en este equipo</label>
+    <button class="btn primary" type="submit" id="lBoton">Ingresar</button>
+    <div class="err" id="lError" role="alert"></div>
+  </form>
+</section>
+
+<div id="app">
 <header>
   <h1>Compras Ágiles <span>Mercado Público</span></h1>
   <nav>
-    <button data-v="buscar" class="on">Buscar</button>
+    <button data-v="buscar" class="on">Compras Ágiles</button>
+    <button data-v="ordenes">Órdenes de compra</button>
     <button data-v="estado">Estado y alertas</button>
   </nav>
   <div class="status"><span class="dot" id="dot"></span><span id="statusTxt">Cargando…</span>
-    <a class="btn" id="btnSync" target="_blank" rel="noopener" title="Abre GitHub para ejecutar una actualización ahora">Actualizar ahora</a></div>
+    <a class="btn" id="btnSync" target="_blank" rel="noopener" title="Abre GitHub para ejecutar una actualización ahora">Actualizar ahora</a>
+    <span class="user"><span id="quien"></span><button class="btn" id="btnSalir">Salir</button></span></div>
 </header>
 
+<!-- ─── COMPRAS ÁGILES ─── -->
 <!-- ─── BUSCAR ─── -->
 <section class="view on" id="v-buscar">
 <main>
@@ -156,6 +211,49 @@
 </main>
 </section>
 
+<!-- ─── ÓRDENES DE COMPRA ─── -->
+<section class="view" id="v-ordenes">
+<main>
+  <aside class="panel" id="oFiltros">
+    <div class="f"><label for="oQ">Buscar</label>
+      <input type="text" id="oQ" placeholder="código, nombre, comprador, producto…"></div>
+    <div class="f"><span class="lbl">Estado</span><div class="chips" id="oEstados"></div></div>
+    <div class="f"><label for="oTipo">Tipo</label><select id="oTipo">
+      <option value="">Todas</option><option value="ag">Solo Compra Ágil</option><option value="otras">Otras (convenio marco, licitación, trato directo…)</option></select></div>
+    <div class="f"><span class="lbl">Fecha de envío</span>
+      <div class="dates"><span>Desde</span><input type="date" id="oDesde"><span>Hasta</span><input type="date" id="oHasta"></div>
+      <div class="quick" id="oFechaQuick"><button data-p="7">Últimos 7 días</button><button data-p="30">Últimos 30 días</button><button data-p="mes">Este mes</button><button data-p="anio">Este año</button></div></div>
+    <div class="f"><span class="lbl">Monto (CLP)</span>
+      <div class="row2"><input type="number" id="oMin" placeholder="Mínimo" min="0" step="50000"><input type="number" id="oMax" placeholder="Máximo" min="0" step="50000"></div></div>
+    <div class="f"><label for="oComprador">Comprador</label><select id="oComprador"><option value="">Todos</option></select></div>
+    <div class="f"><label for="oRegion">Región</label><select id="oRegion"><option value="">Todas</option></select></div>
+    <button class="btn" id="oLimpiar" style="width:100%">Limpiar filtros</button>
+  </aside>
+
+  <section class="panel">
+    <div class="kpis" id="oKpis"></div>
+    <div class="summary">
+      <div><b id="oTotal">–</b> <span class="meta">órdenes de compra</span></div>
+      <div class="meta" id="oHistorial"></div>
+      <div class="sp"></div>
+      <select id="oOrden" style="width:auto">
+        <option value="fecha_desc">Más recientes</option>
+        <option value="fecha_asc">Más antiguas</option>
+        <option value="monto_desc">Mayor monto</option>
+        <option value="monto_asc">Menor monto</option>
+        <option value="comprador">Comprador (A-Z)</option>
+      </select>
+      <button class="btn" id="oCsv">Exportar CSV</button>
+    </div>
+    <div class="tabla-scroll"><table class="octable">
+      <thead><tr><th>Fecha</th><th>Orden de compra</th><th class="opc">Comprador</th><th>Estado</th><th class="num">Monto</th></tr></thead>
+      <tbody id="oLista"></tbody>
+    </table></div>
+    <div class="pager" id="oPager"></div>
+  </section>
+</main>
+</section>
+
 <!-- ─── ESTADO ─── -->
 <section class="view" id="v-estado"><div class="wrap"><div class="panel">
   <h2>Estado del sistema</h2>
@@ -164,21 +262,98 @@
     <p>El sitio se actualiza solo cada 15 minutos mediante GitHub Actions; GitHub puede atrasar algunas ejecuciones.
     Cuando un organismo le emite a tu empresa una orden de compra de Compra Ágil, el aviso llega por los canales activos.</p>
     <p>Para enviar un <b>mensaje de prueba</b> o forzar una actualización: botón <i>Actualizar ahora</i> → <i>Run workflow</i> (requiere tu sesión de GitHub).</p>
+    <p>Los datos del sitio están cifrados: solo se pueden leer después de ingresar con un usuario y clave válidos.</p>
   </div>
 </div></div></section>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+{
 const $ = (s) => document.querySelector(s);
 const clp = (n) => n == null ? null : '$' + Math.round(n).toLocaleString('es-CL');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmtFecha = (s) => s ? new Date(s).toLocaleString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '–';
+const fmtDia = (s) => s ? new Date(s).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }) : '–';
 const isoDia = (d) => d.toLocaleDateString('sv-SE');
 const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const horaChile = () => new Date().toLocaleString('sv-SE', { timeZone: 'America/Santiago' }).replace(' ', 'T');
 function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
+const almacen = { get(k) { try { return sessionStorage.getItem(k) || localStorage.getItem(k); } catch { return null; } },
+  set(k, v, rec) { try { (rec ? localStorage : sessionStorage).setItem(k, v); } catch {} },
+  del(k) { try { sessionStorage.removeItem(k); localStorage.removeItem(k); } catch {} } };
 
+// ═══ Cifrado (los datos publicados solo se leen con usuario y clave) ═══
+const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const aB64 = (u8) => btoa(String.fromCharCode(...u8));
+let LLAVE = null;
+async function sha256hex(t) { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, '0')).join(''); }
+async function descifrarCon(key, txt) { const raw = b64(txt.trim()); return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: raw.slice(0, 12) }, key, raw.slice(12))); }
+const importar = (raw) => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+async function leerCifrado(ruta) {
+  const r = await fetch(ruta, { cache: 'no-cache' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return JSON.parse(new TextDecoder().decode(await descifrarCon(LLAVE, await r.text())));
+}
+
+async function ingresar(usuario, clave, recordar) {
+  if (!window.crypto || !crypto.subtle) throw new Error('Este navegador no permite abrir los datos cifrados. Usa Chrome, Edge, Firefox o Safari actualizados.');
+  const r = await fetch('data/acceso.json', { cache: 'no-cache' });
+  if (!r.ok) throw new Error('El sitio aún no tiene datos publicados. Espera a que termine la primera actualización en GitHub.');
+  const acceso = await r.json();
+  if (acceso.sinUsuarios) throw new Error('No hay usuarios configurados. Crea el secret SITE_USUARIOS en GitHub (ver README).');
+  const id = await sha256hex('compras-agiles|' + usuario.trim().toLowerCase());
+  const u = acceso.usuarios.find((x) => x.id === id);
+  if (!u) throw new Error('Usuario o clave incorrectos.');
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(clave.trim()), 'PBKDF2', false, ['deriveKey']);
+  const k = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(u.sal), iterations: acceso.iteraciones, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  let raw;
+  try { raw = await descifrarCon(k, u.llave); } catch { throw new Error('Usuario o clave incorrectos.'); }
+  LLAVE = await importar(raw);
+  almacen.set('ca-llave', aB64(raw), recordar);
+  almacen.set('ca-usuario', usuario.trim().toLowerCase(), recordar);
+}
+
+$('#formLogin').onsubmit = async (e) => {
+  e.preventDefault();
+  $('#lError').textContent = ''; $('#lBoton').disabled = true; $('#lBoton').textContent = 'Verificando…';
+  try { await ingresar($('#lUsuario').value, $('#lClave').value, $('#lRecordar').checked); $('#lClave').value = ''; await abrirApp(); }
+  catch (err) { $('#lError').textContent = err.message; }
+  finally { $('#lBoton').disabled = false; $('#lBoton').textContent = 'Ingresar'; }
+};
+function salir(msg) {
+  LLAVE = null; almacen.del('ca-llave'); almacen.del('ca-usuario');
+  document.body.classList.remove('dentro'); $('#lError').textContent = msg || ''; $('#lUsuario').focus();
+}
+$('#btnSalir').onclick = () => salir();
+
+// ═══ Navegación ═══
+document.querySelectorAll('nav button').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach((x) => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
+  try { history.replaceState(null, '', '#' + b.dataset.v); } catch {}
+});
+(() => {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const repo = location.pathname.split('/').filter(Boolean)[0];
+  if (m) $('#btnSync').href = `https://github.com/${m[1]}/${repo && repo !== 'index.html' ? repo : m[1] + '.github.io'}/actions/workflows/actualizar.yml`;
+  else $('#btnSync').style.display = 'none';
+})();
+function descargarCSV(nombre, cols, filas) {
+  const e = (v) => `"${String(Array.isArray(v) ? v.join(' | ') : v ?? '').replace(/"/g, '""')}"`;
+  const csv = '﻿' + [cols.map((c) => c[0]).join(';'), ...filas.map((f) => cols.map((c) => e(c[1](f))).join(';'))].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = nombre; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function paginador(el, total, pagina, ir) {
+  const n = Math.ceil(total / 50);
+  el.innerHTML = n > 1 ? `<button class="btn" ${pagina <= 1 ? 'disabled' : ''} data-p="-1">Anterior</button> Página ${pagina} de ${n} <button class="btn" ${pagina >= n ? 'disabled' : ''} data-p="1">Siguiente</button>` : '';
+  el.querySelectorAll('button').forEach((b) => b.onclick = () => { ir(pagina + Number(b.dataset.p)); scrollTo(0, 0); });
+}
+
+// ═══ COMPRAS ÁGILES ═══
 const SECTORES = [
   ['salud', 'Salud'], ['educacion', 'Educación'], ['tecnologia', 'Tecnología'], ['construccion', 'Construcción y obras'],
   ['alimentacion', 'Alimentación'], ['aseo', 'Aseo y mantención'], ['transporte', 'Transporte y vehículos'],
@@ -189,76 +364,40 @@ const REGIONES = [[15, 'Arica y Parinacota'], [1, 'Tarapacá'], [2, 'Antofagasta
   [13, 'Metropolitana'], [6, "O'Higgins"], [7, 'Maule'], [16, 'Ñuble'], [8, 'Biobío'], [9, 'Araucanía'], [14, 'Los Ríos'],
   [10, 'Los Lagos'], [11, 'Aysén'], [12, 'Magallanes']];
 
-let TODAS = [];
-let selSectores = new Set();
-let page = 1;
-const PAGINA = 50;
+let COMPRAS = [], selSectores = new Set(), page = 1, resCompras = [];
 const campos = ['q', 'excluir', 'pubDesde', 'pubHasta', 'cierreDesde', 'cierreHasta', 'montoMin', 'montoMax', 'region', 'llamado', 'orden'];
-
-// Enlace "Actualizar ahora" → página del workflow en GitHub (deducida de la URL del sitio)
-(() => {
-  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
-  const repo = location.pathname.split('/').filter(Boolean)[0];
-  if (m) $('#btnSync').href = `https://github.com/${m[1]}/${repo && repo !== 'index.html' ? repo : m[1] + '.github.io'}/actions/workflows/actualizar.yml`;
-  else $('#btnSync').style.display = 'none';
-})();
-
-// ─── Navegación ───
-document.querySelectorAll('nav button').forEach((b) => b.onclick = () => {
-  document.querySelectorAll('nav button').forEach((x) => x.classList.toggle('on', x === b));
-  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
-  if (b.dataset.v === 'estado') cargarEstado();
-});
-
-// ─── Filtros ───
-function leerFiltros() {
-  const f = {}; for (const c of campos) f[c] = $('#' + c).value;
-  f.sinMonto = $('#sinMonto').checked; f.sectores = selSectores; return f;
+function guardarFiltros() {
+  const p = {}; for (const c of campos) p[c] = $('#' + c).value;
+  p.sector = [...selSectores]; p.sinMonto = $('#sinMonto').checked;
+  almacen.set('ca-filtros', JSON.stringify(p), true);
 }
-function guardar() {
-  const p = new URLSearchParams();
-  for (const c of campos) { const v = $('#' + c).value; if (v) p.set(c, v); }
-  if (selSectores.size) p.set('sector', [...selSectores].join(','));
-  if (!$('#sinMonto').checked) p.set('sinMonto', '0');
-  history.replaceState(null, '', p.toString() ? '?' + p : location.pathname);
-  try { localStorage.setItem('ca-filtros', p.toString()); } catch {}
-}
-function restaurar() {
-  let s = location.search.slice(1);
-  if (!s) { try { s = localStorage.getItem('ca-filtros') || ''; } catch {} }
-  const p = new URLSearchParams(s);
-  for (const c of campos) if (p.has(c)) $('#' + c).value = p.get(c);
-  if (p.get('sector')) selSectores = new Set(p.get('sector').split(','));
-  $('#sinMonto').checked = p.get('sinMonto') !== '0';
+function restaurarFiltros() {
+  let p = {}; try { p = JSON.parse(localStorage.getItem('ca-filtros') || '{}'); } catch {}
+  for (const c of campos) if (p[c] != null) $('#' + c).value = p[c];
+  selSectores = new Set(p.sector || []); $('#sinMonto').checked = p.sinMonto !== false;
   if (!$('#orden').value) $('#orden').value = 'cierre_asc';
 }
-
-function filtrar(f) {
-  const terminos = norm(f.q).split(/\s+/).filter(Boolean);
-  const excluir = norm(f.excluir).split(/\s+/).filter(Boolean);
-  const montoMin = f.montoMin ? Number(f.montoMin) : null, montoMax = f.montoMax ? Number(f.montoMax) : null;
+function filtrarCompras() {
+  const f = {}; for (const c of campos) f[c] = $('#' + c).value;
+  const terminos = norm(f.q).split(/\s+/).filter(Boolean), excluir = norm(f.excluir).split(/\s+/).filter(Boolean);
+  const mMin = f.montoMin ? Number(f.montoMin) : null, mMax = f.montoMax ? Number(f.montoMax) : null, sinMonto = $('#sinMonto').checked;
   const d = (v, fin) => (v ? v + (fin ? 'T23:59:59' : 'T00:00:00') : null);
-  const pubDesde = d(f.pubDesde), pubHasta = d(f.pubHasta, true), cieDesde = d(f.cierreDesde), cieHasta = d(f.cierreHasta, true);
-  const region = f.region ? Number(f.region) : null;
-  const ahora = horaChile();
-  const out = TODAS.filter((c) => {
+  const pD = d(f.pubDesde), pH = d(f.pubHasta, true), cD = d(f.cierreDesde), cH = d(f.cierreHasta, true);
+  const region = f.region ? Number(f.region) : null, ahora = horaChile();
+  const out = COMPRAS.filter((c) => {
     if (c.fechaCierre && c.fechaCierre < ahora) return false;
-    if (f.sectores.size && !c.sectores.some((s) => f.sectores.has(s))) return false;
+    if (selSectores.size && !c.sectores.some((s) => selSectores.has(s))) return false;
     if (region && c.regionId !== region) return false;
     if (f.llamado && c.convocatoria !== Number(f.llamado)) return false;
-    if (pubDesde && (!c.fechaPublicacion || c.fechaPublicacion < pubDesde)) return false;
-    if (pubHasta && (!c.fechaPublicacion || c.fechaPublicacion > pubHasta)) return false;
-    if (cieDesde && (!c.fechaCierre || c.fechaCierre < cieDesde)) return false;
-    if (cieHasta && (!c.fechaCierre || c.fechaCierre > cieHasta)) return false;
-    if (c.montoCLP == null) { if (!f.sinMonto) return false; }
-    else {
-      if (montoMin != null && c.montoCLP < montoMin) return false;
-      if (montoMax != null && c.montoCLP > montoMax) return false;
-    }
+    if (pD && (!c.fechaPublicacion || c.fechaPublicacion < pD)) return false;
+    if (pH && (!c.fechaPublicacion || c.fechaPublicacion > pH)) return false;
+    if (cD && (!c.fechaCierre || c.fechaCierre < cD)) return false;
+    if (cH && (!c.fechaCierre || c.fechaCierre > cH)) return false;
+    if (c.montoCLP == null) { if (!sinMonto) return false; }
+    else { if (mMin != null && c.montoCLP < mMin) return false; if (mMax != null && c.montoCLP > mMax) return false; }
     if (terminos.length || excluir.length) {
       c._t ||= norm(`${c.codigo} ${c.nombre} ${c.organismo} ${c.unidad} ${c.texto}`);
-      if (!terminos.every((w) => c._t.includes(w))) return false;
-      if (excluir.some((w) => c._t.includes(w))) return false;
+      if (!terminos.every((w) => c._t.includes(w)) || excluir.some((w) => c._t.includes(w))) return false;
     }
     return true;
   });
@@ -270,66 +409,45 @@ function filtrar(f) {
   }[f.orden] || ((a, b) => (a.fechaCierre || '9').localeCompare(b.fechaCierre || '9'));
   return out.sort(orden);
 }
-
-let t;
-function buscarLuego() { clearTimeout(t); t = setTimeout(() => { page = 1; buscar(); }, 150); }
+let tC;
+const buscarLuego = () => { clearTimeout(tC); tC = setTimeout(() => { page = 1; buscar(); }, 150); };
 document.querySelectorAll('#filtros input, #filtros select, #orden').forEach((el) => el.addEventListener('input', buscarLuego));
-
 document.querySelectorAll('.quick[data-target]').forEach((q) => q.onclick = (e) => {
   const d = e.target.dataset.d; if (d == null) return;
-  const hoy = new Date(); const otra = new Date();
+  const hoy = new Date(), otra = new Date();
   if (q.dataset.target === 'pub') { otra.setDate(hoy.getDate() - d); $('#pubDesde').value = isoDia(otra); $('#pubHasta').value = isoDia(hoy); }
   else { otra.setDate(hoy.getDate() + Number(d)); $('#cierreDesde').value = isoDia(hoy); $('#cierreHasta').value = isoDia(otra); }
   buscarLuego();
 });
-$('#montoQuick').onclick = (e) => {
-  const r = e.target.dataset.r; if (!r) return;
-  const [a, b] = r.split('-'); $('#montoMin').value = a; $('#montoMax').value = b; buscarLuego();
-};
+$('#montoQuick').onclick = (e) => { const r = e.target.dataset.r; if (!r) return; const [a, b] = r.split('-'); $('#montoMin').value = a; $('#montoMax').value = b; buscarLuego(); };
 $('#limpiar').onclick = () => { campos.forEach((c) => c !== 'orden' && ($('#' + c).value = '')); selSectores.clear(); $('#sinMonto').checked = true; buscarLuego(); };
-
-let ultimoResultado = [];
-$('#csv').onclick = () => {
-  const cols = ['codigo', 'nombre', 'organismo', 'unidad', 'region', 'sectores', 'convocatoria', 'montoCLP', 'fechaPublicacion', 'fechaCierre', 'url'];
-  const e = (v) => `"${String(Array.isArray(v) ? v.join(' | ') : v ?? '').replace(/"/g, '""')}"`;
-  const csv = '﻿' + [cols.join(';'), ...ultimoResultado.map((c) => cols.map((k) => e(c[k])).join(';'))].join('\r\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = 'compras-agiles.csv'; a.click(); URL.revokeObjectURL(a.href);
-};
+$('#csv').onclick = () => descargarCSV('compras-agiles.csv', [
+  ['codigo', (c) => c.codigo], ['nombre', (c) => c.nombre], ['organismo', (c) => c.organismo], ['unidad', (c) => c.unidad], ['region', (c) => c.region],
+  ['sectores', (c) => c.sectores], ['llamado', (c) => c.convocatoria], ['montoCLP', (c) => c.montoCLP], ['publicacion', (c) => c.fechaPublicacion],
+  ['cierre', (c) => c.fechaCierre], ['link', (c) => 'https://compra-agil.mercadopublico.cl/resumen-cotizacion/' + c.codigo]], resCompras);
 
 function pintarSectores(conteo = {}) {
   $('#sectores').innerHTML = SECTORES.map((s) =>
     `<span class="chip ${selSectores.has(s.id) ? 'on' : ''}" data-id="${s.id}">${esc(s.nombre)}${conteo[s.id] != null ? `<small>${conteo[s.id]}</small>` : ''}</span>`).join('');
   document.querySelectorAll('#sectores .chip').forEach((c) => c.onclick = () => {
-    selSectores.has(c.dataset.id) ? selSectores.delete(c.dataset.id) : selSectores.add(c.dataset.id);
-    c.classList.toggle('on'); buscarLuego();
+    selSectores.has(c.dataset.id) ? selSectores.delete(c.dataset.id) : selSectores.add(c.dataset.id); c.classList.toggle('on'); buscarLuego();
   });
 }
-
 function badgeCierre(f) {
   if (!f) return '<span class="badge">Sin fecha</span>';
   const h = (new Date(f) - new Date()) / 36e5;
   const txt = h < 24 ? `Cierra en ${Math.max(0, Math.round(h))} h` : `Cierra en ${Math.floor(h / 24)} día${Math.floor(h / 24) === 1 ? '' : 's'}`;
   return `<span class="badge ${h < 24 ? 'urg' : h < 72 ? 'pro' : ''}">${txt}</span>`;
 }
-
-const archivo = (codigo) => codigo.replace(/[^A-Za-z0-9-]/g, '_') + '.json';
+const archivo = (codigo) => codigo.replace(/[^A-Za-z0-9-]/g, '_') + '.enc';
 async function verDetalle(btn, codigo) {
-  const card = btn.closest('.card');
-  const abierto = card.querySelector('.det');
+  const card = btn.closest('.card'), abierto = card.querySelector('.det');
   if (abierto) { abierto.remove(); btn.textContent = 'Ver detalle'; return; }
-  const c = TODAS.find((x) => x.codigo === codigo);
-  const div = document.createElement('div'); div.className = 'det';
-  btn.textContent = 'Ocultar detalle';
-  if (!c.det) {
-    div.innerHTML = `El detalle de esta compra todavía no se descarga (se van descargando de a poco para cuidar la cuota de la API).
-      <a href="${esc(c.url)}" target="_blank" rel="noopener">Ver la ficha en Mercado Público</a>.`;
-    card.appendChild(div); return;
-  }
-  const r = await fetch('data/detalle/' + archivo(codigo));
-  if (!r.ok) { div.innerHTML = '<span class="no">No se pudo cargar el detalle.</span>'; card.appendChild(div); return; }
-  const d = await r.json();
+  const c = COMPRAS.find((x) => x.codigo === codigo);
+  const div = document.createElement('div'); div.className = 'det'; btn.textContent = 'Ocultar detalle';
+  if (!c.det) { div.innerHTML = 'El detalle de esta compra todavía no se descarga (se van descargando de a poco para cuidar la cuota de la API). Usa el botón <b>IR</b> para verla en Mercado Público.'; card.appendChild(div); return; }
+  let d;
+  try { d = await leerCifrado('data/detalle/' + archivo(codigo)); } catch { div.innerHTML = '<span class="no">No se pudo cargar el detalle.</span>'; card.appendChild(div); return; }
   div.innerHTML = `
     ${d.descripcion ? `<p>${esc(d.descripcion)}</p>` : ''}
     ${d.productos.length ? `<table><thead><tr><th>Producto solicitado</th><th>Cantidad</th></tr></thead><tbody>${d.productos.map((p) =>
@@ -342,17 +460,16 @@ async function verDetalle(btn, codigo) {
     </div>`;
   card.appendChild(div);
 }
-
 function buscar() {
-  guardar();
-  const res = ultimoResultado = filtrar(leerFiltros());
+  guardarFiltros();
+  const res = resCompras = filtrarCompras();
   const conteo = {}; for (const c of res) for (const s of c.sectores) conteo[s] = (conteo[s] || 0) + 1;
   const montoTotal = res.reduce((s, c) => s + (c.montoCLP || 0), 0);
   $('#total').textContent = res.length.toLocaleString('es-CL');
   $('#montoTot').textContent = montoTotal ? `Presupuesto total: ${clp(montoTotal)}` : '';
   pintarSectores(conteo);
   const nombreSector = Object.fromEntries(SECTORES.map((s) => [s.id, s.nombre]));
-  const items = res.slice((page - 1) * PAGINA, page * PAGINA);
+  const items = res.slice((page - 1) * 50, page * 50);
   $('#lista').innerHTML = items.length ? items.map((c) => `
     <article class="card">
       <div>
@@ -371,56 +488,183 @@ function buscar() {
         <div class="cierre">${badgeCierre(c.fechaCierre)}</div>
         <div class="meta">${fmtFecha(c.fechaCierre)}</div>
       </div>
-    </article>`).join('') : `<div class="empty">${TODAS.length ? 'No hay Compras Ágiles abiertas con estos filtros.' : 'Aún no hay datos. La primera actualización en GitHub tarda entre 10 y 20 minutos.'}</div>`;
+    </article>`).join('') : `<div class="empty">${COMPRAS.length ? 'No hay Compras Ágiles abiertas con estos filtros.' : 'Aún no hay datos. La primera actualización en GitHub tarda entre 10 y 20 minutos.'}</div>`;
   document.querySelectorAll('.linkbtn[data-cod]').forEach((b) => b.onclick = () => verDetalle(b, b.dataset.cod));
-  const paginas = Math.ceil(res.length / PAGINA);
-  $('#pager').innerHTML = paginas > 1 ? `<button class="btn" ${page <= 1 ? 'disabled' : ''} id="prev">Anterior</button> Página ${page} de ${paginas} <button class="btn" ${page >= paginas ? 'disabled' : ''} id="next">Siguiente</button>` : '';
-  if ($('#prev')) $('#prev').onclick = () => { page--; buscar(); scrollTo(0, 0); };
-  if ($('#next')) $('#next').onclick = () => { page++; buscar(); scrollTo(0, 0); };
+  paginador($('#pager'), res.length, page, (p) => { page = p; buscar(); });
 }
 
-// ─── Datos y estado ───
-let generado = null;
-async function cargarDatos() {
-  try {
-    const r = await fetch('data/compras.json', { cache: 'no-cache' });
-    if (!r.ok) throw new Error(r.status);
-    const j = await r.json();
-    if (j.generado === generado) return false;
-    generado = j.generado; TODAS = j.items; return true;
-  } catch { return false; }
+// ═══ ÓRDENES DE COMPRA ═══
+let ORDENES = [], OC_META = {}, selEstados = new Set(), oPage = 1, resOrdenes = [];
+const oCampos = ['oQ', 'oTipo', 'oDesde', 'oHasta', 'oMin', 'oMax', 'oComprador', 'oRegion', 'oOrden'];
+const claseEstado = (c) => ({ '6': 'e-ok', '12': 'e-ok', '4': 'e-pend', '5': 'e-pend', '13': 'e-rec', '14': 'e-rec', '15': 'e-rec', '9': 'e-can' }[c] || '');
+const fechaOC = (o) => o.fechaEnvio || o.fechaCreacion || '';
+
+function filtrarOrdenes() {
+  const f = {}; for (const c of oCampos) f[c] = $('#' + c).value;
+  const terminos = norm(f.oQ).split(/\s+/).filter(Boolean);
+  const mMin = f.oMin ? Number(f.oMin) : null, mMax = f.oMax ? Number(f.oMax) : null;
+  const out = ORDENES.filter((o) => {
+    if (selEstados.size && !selEstados.has(o.estado || 'Sin estado')) return false;
+    if (f.oTipo === 'ag' && !o.compraAgil) return false;
+    if (f.oTipo === 'otras' && o.compraAgil) return false;
+    const fe = fechaOC(o).slice(0, 10);
+    if (f.oDesde && (!fe || fe < f.oDesde)) return false;
+    if (f.oHasta && (!fe || fe > f.oHasta)) return false;
+    if (mMin != null && (o.total ?? 0) < mMin) return false;
+    if (mMax != null && (o.total ?? 0) > mMax) return false;
+    if (f.oComprador && o.comprador !== f.oComprador) return false;
+    if (f.oRegion && o.region !== f.oRegion) return false;
+    if (terminos.length) {
+      o._t ||= norm(`${o.codigo} ${o.nombre} ${o.comprador} ${o.unidad} ${o.licitacion} ${(o.items || []).map((i) => i.producto + ' ' + i.especificacion).join(' ')}`);
+      if (!terminos.every((w) => o._t.includes(w))) return false;
+    }
+    return true;
+  });
+  const orden = {
+    fecha_desc: (a, b) => fechaOC(b).localeCompare(fechaOC(a)),
+    fecha_asc: (a, b) => fechaOC(a).localeCompare(fechaOC(b)),
+    monto_desc: (a, b) => (b.total ?? -1) - (a.total ?? -1),
+    monto_asc: (a, b) => (a.total ?? Infinity) - (b.total ?? Infinity),
+    comprador: (a, b) => (a.comprador || '').localeCompare(b.comprador || '', 'es'),
+  }[f.oOrden] || ((a, b) => fechaOC(b).localeCompare(fechaOC(a)));
+  return out.sort(orden);
+}
+let tO;
+const buscarOCLuego = () => { clearTimeout(tO); tO = setTimeout(() => { oPage = 1; buscarOC(); }, 150); };
+document.querySelectorAll('#oFiltros input, #oFiltros select, #oOrden').forEach((el) => el.addEventListener('input', buscarOCLuego));
+$('#oFechaQuick').onclick = (e) => {
+  const p = e.target.dataset.p; if (!p) return;
+  const hoy = new Date(); let desde = new Date();
+  if (p === 'mes') desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  else if (p === 'anio') desde = new Date(hoy.getFullYear(), 0, 1);
+  else desde.setDate(hoy.getDate() - Number(p));
+  $('#oDesde').value = isoDia(desde); $('#oHasta').value = isoDia(hoy); buscarOCLuego();
+};
+$('#oLimpiar').onclick = () => { oCampos.forEach((c) => c !== 'oOrden' && ($('#' + c).value = '')); selEstados.clear(); buscarOCLuego(); };
+$('#oCsv').onclick = () => descargarCSV('ordenes-de-compra.csv', [
+  ['codigo', (o) => o.codigo], ['nombre', (o) => o.nombre], ['estado', (o) => o.estado], ['tipo', (o) => o.tipo], ['compraAgil', (o) => o.compraAgil ? 'Sí' : 'No'],
+  ['compraAgilOrigen', (o) => o.licitacion], ['comprador', (o) => o.comprador], ['unidad', (o) => o.unidad], ['region', (o) => o.region],
+  ['fechaEnvio', (o) => fechaOC(o)], ['fechaAceptacion', (o) => o.fechaAceptacion], ['totalNeto', (o) => o.totalNeto], ['total', (o) => o.total],
+  ['contacto', (o) => o.contacto ? [o.contacto.nombre, o.contacto.mail, o.contacto.fono].filter(Boolean).join(' · ') : ''], ['link', (o) => o.url]], resOrdenes);
+
+function pintarEstados(conteo) {
+  const todos = [...new Set(ORDENES.map((o) => o.estado || 'Sin estado'))].sort((a, b) => (conteo[b] || 0) - (conteo[a] || 0));
+  $('#oEstados').innerHTML = todos.length ? todos.map((s) => `<span class="chip ${selEstados.has(s) ? 'on' : ''}" data-e="${esc(s)}">${esc(s)}<small>${conteo[s] || 0}</small></span>`).join('') : '<span class="meta">Sin datos</span>';
+  document.querySelectorAll('#oEstados .chip').forEach((c) => c.onclick = () => {
+    selEstados.has(c.dataset.e) ? selEstados.delete(c.dataset.e) : selEstados.add(c.dataset.e); c.classList.toggle('on'); buscarOCLuego();
+  });
+}
+function detalleOC(o) {
+  const items = o.items || [];
+  return `<div class="det">
+    ${items.length ? `<table><thead><tr><th>Producto</th><th class="num">Cantidad</th><th class="num">Precio neto</th><th class="num">Total</th></tr></thead><tbody>${items.map((i) =>
+      `<tr><td><b>${esc(i.producto || i.categoria)}</b>${i.especificacion ? `<div class="meta">${esc(i.especificacion)}</div>` : ''}</td><td class="num">${esc(i.cantidad ?? '')} ${esc(i.unidad)}</td><td class="num">${clp(i.precioNeto) || '–'}</td><td class="num">${clp(i.total) || '–'}</td></tr>`).join('')}</tbody></table>` : '<p class="meta">Sin detalle de productos.</p>'}
+    <div class="kv2">
+      <div>Comprador</div><div>${esc(o.comprador)}${o.unidad ? ' · ' + esc(o.unidad) : ''}${o.region ? ' · ' + esc(o.region) : ''}</div>
+      <div>Contacto</div><div>${o.contacto && (o.contacto.nombre || o.contacto.mail || o.contacto.fono) ? esc([o.contacto.nombre, o.contacto.mail, o.contacto.fono].filter(Boolean).join(' · ')) : '–'}</div>
+      <div>Tipo</div><div>${o.compraAgil ? 'Compra Ágil' : esc(o.tipo || '–')}${o.licitacion ? ' · origen ' + esc(o.licitacion) : ''}</div>
+      <div>Fechas</div><div>Envío ${fmtDia(fechaOC(o))}${o.fechaAceptacion ? ' · aceptada ' + fmtDia(o.fechaAceptacion) : ''}${o.fechaCancelacion ? ' · cancelada ' + fmtDia(o.fechaCancelacion) : ''}</div>
+      <div>Montos</div><div>Neto ${clp(o.totalNeto) || '–'} · impuestos ${clp(o.impuestos) || '–'} · total <b>${clp(o.total) || '–'}</b></div>
+      ${o.aviso ? `<div>Aviso</div><div>${esc(o.aviso)}${o.detalleAviso ? ' · ' + esc(o.detalleAviso) : ''}</div>` : ''}
+    </div>
+    <div class="acc"><a class="ir" href="${esc(o.url)}" target="_blank" rel="noopener">IR</a><span class="meta">Abre la orden en Mercado Público</span></div>
+  </div>`;
+}
+function buscarOC() {
+  const res = resOrdenes = filtrarOrdenes();
+  const conteo = {}; for (const o of res) conteo[o.estado || 'Sin estado'] = (conteo[o.estado || 'Sin estado'] || 0) + 1;
+  pintarEstados(conteo);
+  const suma = (arr) => arr.reduce((s, o) => s + (o.total || 0), 0);
+  const ok = res.filter((o) => ['6', '12', '13', '14', '15'].includes(o.codigoEstado));
+  const pend = res.filter((o) => ['4', '5'].includes(o.codigoEstado));
+  const can = res.filter((o) => o.codigoEstado === '9');
+  $('#oKpis').innerHTML = [
+    [clp(suma(res)) || '$0', 'Monto total'],
+    [`${ok.length}`, `Aceptadas o recibidas · ${clp(suma(ok)) || '$0'}`],
+    [`${pend.length}`, `Por aceptar · ${clp(suma(pend)) || '$0'}`],
+    [`${can.length}`, 'Canceladas'],
+  ].map(([b, s]) => `<div class="kpi"><b>${b}</b><span>${esc(s)}</span></div>`).join('');
+  $('#oTotal').textContent = res.length.toLocaleString('es-CL');
+  const h = OC_META.historial || {};
+  $('#oHistorial').textContent = h.hasta ? `Historial desde el ${fmtDia(h.hasta + 'T12:00:00')}${h.completo ? '' : ' (se sigue completando)'}` : '';
+  const items = res.slice((oPage - 1) * 50, oPage * 50);
+  $('#oLista').innerHTML = items.length ? items.map((o) => `
+    <tr class="fila" data-cod="${esc(o.codigo)}">
+      <td class="nw">${fmtDia(fechaOC(o))}</td>
+      <td><b>${esc(o.codigo)}</b>${o.compraAgil ? ' <span class="tag s">Compra Ágil</span>' : o.tipo ? ` <span class="tag">${esc(o.tipo)}</span>` : ''}<div class="meta">${esc(o.nombre)}</div></td>
+      <td class="opc">${esc(o.comprador)}</td>
+      <td><span class="est ${claseEstado(o.codigoEstado)}">${esc(o.estado || '–')}</span></td>
+      <td class="num nw">${clp(o.total) || '–'}</td>
+    </tr>`).join('') : `<tr><td colspan="5"><div class="empty">${ORDENES.length ? 'No hay órdenes de compra con estos filtros.' : OC_META.proveedor || OC_META.activo ? 'Todavía no hay órdenes de compra registradas. El historial se descarga de a poco en cada actualización.' : 'El monitor de órdenes de compra no está configurado (secret MP_CODIGO_PROVEEDOR o MP_RUT_PROVEEDOR).'}</div></td></tr>`;
+  document.querySelectorAll('#oLista tr.fila').forEach((tr) => tr.onclick = (e) => {
+    if (e.target.closest('a')) return;
+    const sig = tr.nextElementSibling;
+    if (sig && sig.classList.contains('detfila')) { sig.remove(); return; }
+    const o = ORDENES.find((x) => x.codigo === tr.dataset.cod);
+    tr.insertAdjacentHTML('afterend', `<tr class="detfila"><td colspan="5">${detalleOC(o)}</td></tr>`);
+  });
+  paginador($('#oPager'), res.length, oPage, (p) => { oPage = p; buscarOC(); });
+}
+function llenarSelectsOC() {
+  const opts = (sel, vals, todos) => { const v = $(sel).value; $(sel).innerHTML = `<option value="">${todos}</option>` + vals.map((x) => `<option>${esc(x)}</option>`).join(''); $(sel).value = vals.includes(v) ? v : ''; };
+  opts('#oComprador', [...new Set(ORDENES.map((o) => o.comprador).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es')), 'Todos');
+  opts('#oRegion', [...new Set(ORDENES.map((o) => o.region).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es')), 'Todas');
 }
 
-async function cargarEstado() {
-  let e = null;
-  try { const r = await fetch('data/estado.json', { cache: 'no-cache' }); if (r.ok) e = await r.json(); } catch {}
-  if (!e) { $('#dot').className = 'dot err'; $('#statusTxt').textContent = 'Sin datos todavía'; $('#cfg').innerHTML = '<div>Estado</div><div>Aún no hay una actualización publicada.</div>'; return; }
+// ═══ Estado ═══
+function pintarEstado(e) {
+  if (!e) { $('#dot').className = 'dot err'; $('#statusTxt').textContent = 'Sin datos todavía'; return; }
   const viejo = Date.now() - new Date(e.generado) > 75 * 60e3;
-  const error = /^Error/.test(e.mensajeSync || '');
-  $('#dot').className = 'dot ' + (error || viejo ? 'err' : 'ok');
+  $('#dot').className = 'dot ' + (/^Error/.test(e.mensajeSync || '') || viejo ? 'err' : 'ok');
   $('#statusTxt').textContent = `${e.compras.toLocaleString('es-CL')} abiertas · actualizado ${fmtFecha(e.generado)}`;
   const si = (v, txt) => v ? `<span class="ok">${txt || 'Activo'}</span>` : '<span class="no">No configurado</span>';
+  const h = e.historialOC || {};
   $('#cfg').innerHTML = `
     <div>Última actualización</div><div>${fmtFecha(e.generado)}${viejo ? ' <span class="no">(hace más de una hora: revisa la pestaña Actions en GitHub)</span>' : ''}</div>
     <div>Compras Ágiles</div><div>${esc(e.mensajeSync || '–')}</div>
     <div>Con detalle descargado</div><div>${e.conDetalle.toLocaleString('es-CL')} de ${e.compras.toLocaleString('es-CL')}</div>
+    <div>Empresa</div><div>${e.proveedor ? esc(`${e.proveedor.nombre || ''} (código ${e.proveedor.codigo})`) : e.ocActivo ? 'Configurada por código de proveedor' : si(false)}</div>
     <div>Monitor de órdenes de compra</div><div>${e.ocActivo ? `<span class="ok">Activo</span> · última revisión ${fmtFecha(e.ultimaRevisionOC)}` : si(false)}${e.errorOC ? ` <span class="no">(${esc(e.errorOC)})</span>` : ''}</div>
+    <div>Historial de órdenes</div><div>${e.ordenes} órdenes${h.hasta ? ` · descargado hasta ${fmtDia(h.hasta + 'T12:00:00')}${h.completo ? ' (completo)' : ` (avanzando hacia ${e.diasHistorialOC} días atrás)`}` : ''}</div>
     <div>Órdenes que se avisan</div><div>${e.ocSoloCompraAgil ? 'Solo las de Compra Ágil (tipo AG)' : 'Todas'}</div>
     <div>Email</div><div>${si(e.canales.email)}</div>
     <div>WhatsApp (CallMeBot)</div><div>${si(e.canales.whatsapp)}</div>
     <div>Telegram</div><div>${si(e.canales.telegram)}</div>`;
 }
 
-// ─── Inicio ───
-(async () => {
+// ═══ Carga de datos ═══
+let generado = null;
+async function cargarTodo(forzar) {
+  const [c, o, e] = await Promise.all([leerCifrado('data/compras.enc'), leerCifrado('data/ordenes.enc').catch(() => null), leerCifrado('data/estado.enc').catch(() => null)]);
+  if (!forzar && c.generado === generado) return false;
+  generado = c.generado; COMPRAS = c.items;
+  ORDENES = o ? o.items : []; OC_META = o ? { proveedor: o.proveedor, historial: o.historial } : {};
+  if (e) OC_META.activo = e.ocActivo;
+  pintarEstado(e); llenarSelectsOC();
+  return true;
+}
+async function abrirApp() {
+  try { await cargarTodo(true); }
+  catch (err) { salir(/HTTP 404/.test(err.message) ? 'Todavía no hay datos publicados. Espera a que termine la actualización en GitHub.' : 'Tu sesión ya no es válida (¿cambiaron las claves?). Ingresa de nuevo.'); return; }
+  document.body.classList.add('dentro');
+  $('#quien').textContent = almacen.get('ca-usuario') || '';
   $('#region').innerHTML = '<option value="">Todas</option>' + REGIONES.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('');
-  restaurar();
-  pintarSectores();
-  await Promise.all([cargarDatos(), cargarEstado()]);
-  buscar();
-  // Revisa si hay datos nuevos cada 5 minutos
-  setInterval(async () => { if (document.hidden) return; if (await cargarDatos()) { buscar(); toast('Datos actualizados'); } cargarEstado(); }, 5 * 60e3);
+  restaurarFiltros(); buscar(); buscarOC();
+  const v = location.hash.slice(1);
+  if (['ordenes', 'estado'].includes(v)) document.querySelector(`nav button[data-v="${v}"]`).click();
+}
+
+// ═══ Inicio ═══
+(async () => {
+  const guardada = almacen.get('ca-llave');
+  if (guardada) { try { LLAVE = await importar(b64(guardada)); await abrirApp(); } catch { salir(); } }
+  else $('#lUsuario').focus();
+  setInterval(async () => {
+    if (!LLAVE || document.hidden) return;
+    try { if (await cargarTodo(false)) { buscar(); buscarOC(); toast('Datos actualizados'); } } catch {}
+  }, 5 * 60e3);
 })();
+}
 </script>
 </body>
 </html>
