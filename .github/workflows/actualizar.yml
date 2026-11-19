@@ -1,0 +1,91 @@
+name: Actualizar Compras Ágiles
+
+on:
+  schedule:
+    # Cada 15 minutos (hora UTC). Se evitan los minutos :00 porque GitHub se satura a esa hora.
+    - cron: '4,19,34,49 * * * *'
+  workflow_dispatch:
+    inputs:
+      prueba:
+        description: 'Enviar un mensaje de prueba por email / WhatsApp / Telegram'
+        type: boolean
+        default: false
+      completa:
+        description: 'Forzar descarga completa de Compras Ágiles'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # guardar el estado en la rama "estado"
+  pages: write      # publicar el sitio
+  id-token: write
+
+# Nunca dos ejecuciones a la vez (la siguiente espera a que termine la anterior)
+concurrency:
+  group: actualizar
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --omit=dev
+
+      - name: Recuperar estado anterior
+        run: |
+          mkdir -p data
+          if git fetch --depth=1 origin estado 2>/dev/null; then
+            git show origin/estado:db.json > data/db.json && echo "Estado recuperado"
+          else
+            echo "Primera ejecución: no hay estado previo"
+          fi
+
+      - name: Revisar órdenes de compra y actualizar Compras Ágiles
+        env:
+          MP_TICKET: ${{ secrets.MP_TICKET }}
+          MP_RUT_PROVEEDOR: ${{ secrets.MP_RUT_PROVEEDOR }}
+          MP_CODIGO_PROVEEDOR: ${{ secrets.MP_CODIGO_PROVEEDOR }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          CALLMEBOT: ${{ secrets.CALLMEBOT }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          OC_SOLO_COMPRA_AGIL: ${{ vars.OC_SOLO_COMPRA_AGIL }}
+          CA_URL_FICHA: ${{ vars.CA_URL_FICHA }}
+          PRUEBA: ${{ inputs.prueba }}
+          COMPLETA: ${{ inputs.completa }}
+        run: node src/run.js
+
+      - name: Guardar estado (rama "estado", un solo commit)
+        if: ${{ !cancelled() && hashFiles('data/db.json') != '' }}
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd data
+          git init -q -b estado
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add db.json
+          git commit -qm "Estado $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" estado
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
