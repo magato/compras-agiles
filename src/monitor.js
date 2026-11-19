@@ -1,6 +1,10 @@
-// Revisa periódicamente las órdenes de compra emitidas a tu empresa y avisa las nuevas.
-// Por defecto solo avisa las que vienen de una Compra Ágil: según el glosario de
-// ChileCompra, esas OCs son del tipo "AG" (su código termina en -AG + año, ej. 1234-56-AG26).
+// Órdenes de compra de tu empresa:
+//  · Recientes (hoy y ayer): detecta las nuevas y avisa por email/WhatsApp/Telegram.
+//    Por defecto solo avisa las de Compra Ágil (tipo "AG": su código termina en -AG + año).
+//  · Historial: descarga de a poco las OCs de días anteriores (todos los estados y tipos)
+//    para la sección "Órdenes de compra" del sitio. No genera avisos.
+//  · Seguimiento: vuelve a consultar las OCs que aún pueden cambiar de estado.
+// El estado completo se guarda cifrado, así que aquí sí se guardan montos y compradores.
 const api = require('./mp');
 const store = require('./store');
 const cfg = require('./config');
@@ -8,6 +12,10 @@ const { notificarOC } = require('./notify');
 
 // Estados que significan "te llegó una OC". Las canceladas (9) no se avisan.
 const ESTADOS_AVISO = new Set(['4', '5', '6', '12', '13', '14', '15']);
+// Estados que ya no cambian: no hace falta volver a consultarlos
+const ESTADOS_FINALES = new Set(['9', '12']);
+const MAX_DETALLES_HISTORIAL = 60; // por ejecución
+const MAX_SEGUIMIENTO = 15; // por ejecución
 
 async function codigoProveedor() {
   const db = store.db;
@@ -30,28 +38,136 @@ async function codigoProveedor() {
   return db.proveedor.codigo;
 }
 
-function esCompraAgil(oc, d) {
-  if (/-AG\d{2}$/i.test(oc.codigo)) return true;
-  if (String(d.Tipo || d.CodigoTipo || '').toUpperCase() === 'AG') return true;
-  return /-COT\d{2}$/i.test(oc.licitacion || '');
-}
+const tipoDeCodigo = (codigo) => ((String(codigo).match(/-([A-Z]+)\d{2}$/i) || [])[1] || '').toUpperCase();
 
-function normalizarOC(d, resumen) {
-  const total = Number(d.Total ?? d.TotalNeto ?? 0) || null;
+function normalizarOC(d, resumen, previo) {
+  const cod = d.Codigo || resumen.Codigo;
+  const c = d.Comprador || {};
+  const f = d.Fechas || {};
+  const tipo = String(d.Tipo || d.CodigoTipo || tipoDeCodigo(cod) || '').toUpperCase();
+  const licitacion = d.CodigoLicitacion || '';
+  const items = ((d.Items && d.Items.Listado) || []).map((i) => ({
+    producto: i.Producto || i.NombreProducto || '',
+    categoria: i.Categoria || '',
+    especificacion: i.EspecificacionComprador || i.EspecificacionProveedor || '',
+    cantidad: i.Cantidad ?? null,
+    unidad: i.Unidad || i.UnidadMedida || '',
+    precioNeto: Number(i.PrecioNeto) || null,
+    total: Number(i.Total) || null,
+  }));
   return {
-    codigo: d.Codigo || resumen.Codigo,
+    ...(previo && previo.codigo ? previo : {}),
+    codigo: cod,
     nombre: d.Nombre || resumen.Nombre || '',
     estado: d.Estado || resumen.Estado || '',
     codigoEstado: String(d.CodigoEstado ?? resumen.CodigoEstado ?? ''),
-    comprador: (d.Comprador && d.Comprador.NombreOrganismo) || '',
-    unidad: (d.Comprador && d.Comprador.NombreUnidad) || '',
-    total,
+    tipo,
+    compraAgil: tipo === 'AG' || /-AG\d{2}$/i.test(cod) || /-COT\d{2}$/i.test(licitacion),
+    licitacion,
+    comprador: c.NombreOrganismo || '',
+    unidad: c.NombreUnidad || '',
+    rutUnidad: c.RutUnidad || '',
+    region: (c.RegionUnidad || '').trim(),
+    comuna: (c.ComunaUnidad || '').trim(),
+    contacto: { nombre: c.NombreContacto || '', mail: c.MailContacto || '', fono: c.FonoContacto || '' },
+    total: Number(d.Total) || null,
+    totalNeto: Number(d.TotalNeto) || null,
+    impuestos: Number(d.Impuestos) || null,
     moneda: d.TipoMoneda || 'CLP',
-    licitacion: d.CodigoLicitacion || '',
-    fechaEnvio: (d.Fechas && (d.Fechas.FechaEnvio || d.Fechas.FechaCreacion)) || null,
-    url: `https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=${encodeURIComponent(d.Codigo || resumen.Codigo)}`,
-    detectada: new Date().toISOString(),
+    fechaCreacion: f.FechaCreacion || null,
+    fechaEnvio: f.FechaEnvio || f.FechaCreacion || null,
+    fechaAceptacion: f.FechaAceptacion || null,
+    fechaCancelacion: f.FechaCancelacion || null,
+    fechaModificacion: f.FechaUltimaModificacion || null,
+    items,
+    url: `https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=${encodeURIComponent(cod)}`,
+    detectada: (previo && previo.detectada) || new Date().toISOString(),
+    consultada: new Date().toISOString(),
   };
+}
+
+// Registro antiguo (versión sin historial) que solo guardaba código y aviso
+const esRegistroMinimo = (r) => r && !r.codigo;
+
+async function traer(cod, resumen, previo) {
+  const d = (await api.orden(cod)) || resumen;
+  const oc = normalizarOC(d, resumen, previo);
+  if (previo) { oc.aviso = previo.aviso; oc.intentos = previo.intentos || 0; oc.detalleAviso = previo.detalleAviso; }
+  return oc;
+}
+
+async function recientes(codigo) {
+  const db = store.db;
+  const ahora = new Date();
+  const vistas = new Map();
+  for (const f of [api.fechaMP(ahora), api.fechaMP(new Date(ahora.getTime() - 86400000))]) {
+    for (const o of await api.ordenesProveedor(f, codigo)) vistas.set(o.Codigo, o);
+  }
+  const primeraVez = !db.ocInicializado;
+  for (const [cod, resumen] of vistas) {
+    const previo = db.ordenes[cod];
+    const reintentar = previo && previo.aviso === 'error' && (previo.intentos || 0) < 5;
+    if (previo && !esRegistroMinimo(previo) && !reintentar) {
+      // Ya conocida: si el listado muestra otro estado, se marca para volver a consultarla
+      if (resumen.CodigoEstado != null && String(resumen.CodigoEstado) !== previo.codigoEstado) previo.consultada = null;
+      continue;
+    }
+    const oc = await traer(cod, resumen, previo);
+    db.ordenes[cod] = oc;
+    if (previo && !reintentar) continue; // registro antiguo: ya se avisó (o se omitió) antes
+    oc.intentos = oc.intentos || 0;
+    if (cfg.ocSoloCompraAgil && !oc.compraAgil) { oc.aviso = 'omitida: no es Compra Ágil'; continue; }
+    if (primeraVez) { oc.aviso = 'omitida: carga inicial'; continue; }
+    if (!ESTADOS_AVISO.has(oc.codigoEstado)) { oc.aviso = `omitida: estado ${oc.estado}`; continue; }
+    const res = await notificarOC(oc);
+    oc.intentos++;
+    // Si ningún canal funcionó, se reintenta en la próxima ejecución (hasta 5 veces)
+    oc.aviso = res.some((r) => r.ok) ? 'enviada' : 'error';
+    oc.detalleAviso = res.map((r) => `${r.canal}: ${r.ok ? 'ok' : r.error || r.omitido}`).join(' · ');
+    console.log(`[oc] Nueva OC ${cod} → ${oc.detalleAviso}`);
+  }
+  db.ocInicializado = true;
+}
+
+// Descarga días anteriores, del más reciente al más antiguo, hasta DIAS_HISTORIAL_OC
+async function historial(codigo) {
+  const db = store.db;
+  const dia = 86400000;
+  const limite = Date.now() - cfg.diasHistorialOC * dia;
+  // Empieza 2 días atrás (hoy y ayer los cubre "recientes")
+  let cursor = db.historialOC.hasta ? new Date(db.historialOC.hasta + 'T12:00:00Z').getTime() - dia : Date.now() - 2 * dia;
+  let dias = 0, detalles = 0;
+  while (cursor >= limite && dias < cfg.diasHistorialPorEjecucion) {
+    const lista = await api.ordenesProveedor(api.fechaMP(new Date(cursor)), codigo);
+    const nuevas = lista.filter((o) => !db.ordenes[o.Codigo] || esRegistroMinimo(db.ordenes[o.Codigo]));
+    if (detalles > 0 && detalles + nuevas.length > MAX_DETALLES_HISTORIAL) break; // sigue en la próxima ejecución
+    for (const o of nuevas) {
+      const previo = db.ordenes[o.Codigo];
+      const oc = await traer(o.Codigo, o, previo);
+      if (!oc.aviso) oc.aviso = 'historial';
+      db.ordenes[o.Codigo] = oc;
+      detalles++;
+    }
+    db.historialOC.hasta = new Date(cursor).toISOString().slice(0, 10);
+    cursor -= dia;
+    dias++;
+  }
+  db.historialOC.completo = cursor < limite;
+}
+
+// Vuelve a consultar OCs que todavía pueden cambiar (enviadas, aceptadas, en recepción…)
+async function seguimiento() {
+  const db = store.db;
+  const hace6h = new Date(Date.now() - 6 * 3600e3).toISOString();
+  const pendientes = Object.values(db.ordenes)
+    .filter((o) => o.codigo && !ESTADOS_FINALES.has(o.codigoEstado) && (!o.consultada || o.consultada < hace6h))
+    .sort((a, b) => (a.consultada || '').localeCompare(b.consultada || ''))
+    .slice(0, MAX_SEGUIMIENTO);
+  for (const o of pendientes) {
+    const d = await api.orden(o.codigo);
+    if (d) db.ordenes[o.codigo] = { ...normalizarOC(d, { Codigo: o.codigo }, o), aviso: o.aviso, intentos: o.intentos, detalleAviso: o.detalleAviso };
+    else o.consultada = new Date().toISOString();
+  }
 }
 
 let corriendo = false;
@@ -62,36 +178,16 @@ async function revisar() {
   try {
     const codigo = await codigoProveedor();
     if (!codigo) { console.log('[oc] Sin RUT ni código de proveedor configurado; monitor desactivado.'); return; }
-
-    const ahora = new Date();
-    const fechas = [api.fechaMP(ahora), api.fechaMP(new Date(ahora.getTime() - 86400000))];
-    const vistas = new Map();
-    for (const f of fechas) for (const o of await api.ordenesProveedor(f, codigo)) vistas.set(o.Codigo, o);
-
-    // El estado se guarda en un repositorio público: de cada OC solo se guarda el
-    // código y el resultado del aviso, no montos ni compradores.
-    const primeraVez = !db.ocInicializado;
-    for (const [cod, resumen] of vistas) {
-      const previo = db.ordenes[cod];
-      if (previo && !(previo.aviso === 'error' && (previo.intentos || 0) < 5)) continue;
-      const d = (await api.orden(cod)) || resumen;
-      const oc = normalizarOC(d, resumen);
-      oc.compraAgil = esCompraAgil(oc, d);
-      const reg = { detectada: (previo && previo.detectada) || new Date().toISOString(), intentos: ((previo && previo.intentos) || 0) };
-      db.ordenes[cod] = reg;
-      if (cfg.ocSoloCompraAgil && !oc.compraAgil) { reg.aviso = 'omitida: no es Compra Ágil'; continue; }
-      if (primeraVez) { reg.aviso = 'omitida: carga inicial'; continue; }
-      if (!ESTADOS_AVISO.has(oc.codigoEstado)) { reg.aviso = `omitida: estado ${oc.estado}`; continue; }
-      const res = await notificarOC(oc);
-      reg.intentos++;
-      // Si ningún canal funcionó, se reintenta en la próxima ejecución (hasta 5 veces)
-      reg.aviso = res.some((r) => r.ok) ? 'enviada' : 'error';
-      reg.detalleAviso = res.map((r) => `${r.canal}: ${r.ok ? 'ok' : r.error || r.omitido}`).join(' · ');
-      console.log(`[oc] Nueva OC ${cod} → ${reg.detalleAviso}`);
-    }
-    db.ocInicializado = true;
+    await recientes(codigo); // primero lo urgente: los avisos
+    store.save(true);
     db.ultimaRevisionOC = new Date().toISOString();
     db.errorOC = null;
+    try {
+      await seguimiento();
+      await historial(codigo);
+    } catch (e) {
+      console.warn('[oc] historial/seguimiento:', e.message); // no afecta los avisos
+    }
   } catch (e) {
     console.error('[oc]', e.message);
     db.errorOC = e.message;
