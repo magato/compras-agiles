@@ -50,7 +50,26 @@ function crear(i, publicadaHace = (i % 4) * 864e5) {
 for (let i = 0; i < 70; i++) crear(i);
 
 let ocupadoV1 = false;
-const ocs = [{ Codigo: '2097-512-AG26', Nombre: 'OC inicial', CodigoEstado: 6, Estado: 'Aceptada', Total: 850000, Org: 'Hospital de Prueba', Lic: '1057001-5-COT26' }];
+// Historial de OCs de prueba: 40 órdenes repartidas en los últimos 60 días, con distintos estados y tipos
+const ESTADOS = [[4, 'Enviada a proveedor'], [6, 'Aceptada'], [6, 'Aceptada'], [12, 'Recepción Conforme'], [9, 'Cancelada'], [13, 'Pendiente de Recepcionar']];
+const ORGS = [['Servicio de Salud Araucanía Sur', 'Región de la Araucanía'], ['Hospital Base Valdivia', 'Región de Los Ríos'], ['Municipalidad de Temuco', 'Región de la Araucanía'], ['JUNJI', 'Región Metropolitana de Santiago'], ['Universidad de Chile', 'Región Metropolitana de Santiago']];
+const PRODS = ['Guantes de nitrilo', 'Resmas de papel', 'Tóner HP 85A', 'Mascarillas KN95', 'Alcohol gel 1 L', 'Notebook 14"', 'Servicio de coffee break'];
+const ddmmyyyy = (d) => `${pad(d.getDate())}${pad(d.getMonth() + 1)}${d.getFullYear()}`;
+const ocs = [];
+function nuevaOC({ diasAtras = 0, tipo, estado, total, org, prod } = {}) {
+  const n = ocs.length;
+  const fecha = new Date(Date.now() - diasAtras * 864e5);
+  const [ce, ge] = estado || ESTADOS[n % ESTADOS.length];
+  const [o, reg] = org || ORGS[n % ORGS.length];
+  const t = tipo || (n % 3 === 2 ? 'SE' : 'AG');
+  const p = prod || PRODS[n % PRODS.length];
+  const tot = total || (n + 1) * 137_000;
+  ocs.push({ Codigo: `${2000 + n}-${300 + n}-${t}26`, Nombre: p, CodigoEstado: ce, Estado: ge, Total: tot, Org: o, Reg: reg, Tipo: t,
+    Lic: t === 'AG' ? `${1057000 + n}-${n}-COT26` : '', Fecha: fecha, Prod: p });
+  return ocs.at(-1);
+}
+for (let i = 0; i < 40; i++) nuevaOC({ diasAtras: 2 + Math.floor(i * 1.5) });
+nuevaOC({ diasAtras: 0, estado: [6, 'Aceptada'] }); // una de hoy que ya existía al partir
 
 // ─── v2 ───
 const ok = (payload) => ({ success: 'OK', trace: null, payload, errors: null });
@@ -96,12 +115,16 @@ app.use('/v1', async (req, res, next) => {
   ocupadoV1 = true; await new Promise((r) => setTimeout(r, 30)); ocupadoV1 = false; next();
 });
 app.get('/v1/ordenesdecompra.json', (req, res) => {
-  const map = (o) => ({ Codigo: o.Codigo, Nombre: o.Nombre, CodigoEstado: o.CodigoEstado, Estado: o.Estado, Total: o.Total, TipoMoneda: 'CLP',
-    CodigoLicitacion: o.Lic || '', Comprador: { NombreOrganismo: o.Org }, Fechas: { FechaEnvio: local(new Date()).replace(' ', 'T') + ':00' } });
+  const map = (o) => ({ Codigo: o.Codigo, Nombre: o.Nombre, CodigoEstado: o.CodigoEstado, Estado: o.Estado, Tipo: o.Tipo,
+    Total: o.Total, TotalNeto: Math.round(o.Total / 1.19), Impuestos: o.Total - Math.round(o.Total / 1.19), TipoMoneda: 'CLP', CodigoLicitacion: o.Lic,
+    Comprador: { NombreOrganismo: o.Org, NombreUnidad: 'Abastecimiento', RegionUnidad: o.Reg, ComunaUnidad: 'Comuna', NombreContacto: 'Ana Pérez', MailContacto: 'compras@ejemplo.cl', FonoContacto: '+56 2 2345 6789' },
+    Fechas: { FechaCreacion: local(o.Fecha).replace(' ', 'T') + ':00', FechaEnvio: local(o.Fecha).replace(' ', 'T') + ':00', FechaAceptacion: [6, 12, 13].includes(o.CodigoEstado) ? local(o.Fecha).replace(' ', 'T') + ':00' : null },
+    Items: { Cantidad: 1, Listado: [{ Producto: o.Prod, Categoria: 'Categoría', EspecificacionComprador: 'Según cotización', Cantidad: 10, Unidad: 'Unidad', PrecioNeto: Math.round(o.Total / 11.9), Total: o.Total }] } });
   if (req.query.codigo) return res.json({ Cantidad: 1, Listado: ocs.filter((o) => o.Codigo === req.query.codigo).map(map) });
-  res.json({ Cantidad: ocs.length, Listado: ocs.map((o) => ({ Codigo: o.Codigo, Nombre: o.Nombre, CodigoEstado: o.CodigoEstado })) });
+  const l = ocs.filter((o) => !req.query.fecha || ddmmyyyy(o.Fecha) === req.query.fecha);
+  if (!l.length) return res.json({ Cantidad: 0, FechaCreacion: new Date().toISOString(), Version: 'v1', Listado: [] });
+  res.json({ Cantidad: l.length, Listado: l.map((o) => ({ Codigo: o.Codigo, Nombre: o.Nombre, CodigoEstado: o.CodigoEstado })) });
 });
-// Como la API real: solo encuentra el RUT escrito con puntos
 app.get('/v1/Empresas/BuscarProveedor', (req, res) => /\./.test(req.query.rutempresaproveedor)
   ? res.json({ Cantidad: 1, listaEmpresas: [{ CodigoEmpresa: '17793', NombreEmpresa: 'Mi Empresa SpA' }] })
   : res.json({ Codigo: 10200, Mensaje: 'No hay resultados de empresas.' }));
@@ -114,12 +137,12 @@ app.post('/__cerrar', (req, res) => {
   res.json({ codigo: c.codigo });
 });
 app.post('/__nueva-oc', (req, res) => {
-  const o = { Codigo: `${3000 + ocs.length}-${100 + ocs.length}-AG26`, Nombre: 'Guantes de nitrilo', CodigoEstado: 4, Estado: 'Enviada a proveedor', Total: 1_250_000, Org: 'Servicio de Salud Araucanía Sur', Lic: '1057003-77-COT26' };
-  ocs.push(o); res.json(o);
+  res.json(nuevaOC({ tipo: 'AG', estado: [4, 'Enviada a proveedor'], total: 1_250_000, prod: 'Guantes de nitrilo' }));
 });
 app.post('/__nueva-oc-se', (req, res) => {
-  const o = { Codigo: `${3000 + ocs.length}-${100 + ocs.length}-SE26`, Nombre: 'Licitación grande', CodigoEstado: 4, Estado: 'Enviada a proveedor', Total: 45_000_000, Org: 'Hospital Base', Lic: '1234-5-LP26' };
-  ocs.push(o); res.json(o);
+  res.json(nuevaOC({ tipo: 'SE', estado: [4, 'Enviada a proveedor'], total: 45_000_000, prod: 'Licitación grande' }));
 });
+
+app.post('/__aceptar', (req, res) => { const o = [...ocs].reverse().find((x) => x.CodigoEstado === 4); o.CodigoEstado = 6; o.Estado = 'Aceptada'; res.json({ codigo: o.Codigo }); });
 
 app.listen(4999, () => console.log('Mock Mercado Público en http://localhost:4999'));
