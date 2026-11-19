@@ -46,7 +46,10 @@ jobs:
         run: |
           mkdir -p data
           if git fetch --depth=1 origin estado 2>/dev/null; then
-            git show origin/estado:db.json > data/db.json && echo "Estado recuperado"
+            # db.enc = estado cifrado (versión actual); db.json = versión anterior sin cifrar
+            git show origin/estado:db.enc > data/db.enc 2>/dev/null || rm -f data/db.enc
+            [ -s data/db.enc ] || git show origin/estado:db.json > data/db.json 2>/dev/null || true
+            echo "Estado recuperado"
           else
             echo "Primera ejecución: no hay estado previo"
           fi
@@ -56,6 +59,7 @@ jobs:
           MP_TICKET: ${{ secrets.MP_TICKET }}
           MP_RUT_PROVEEDOR: ${{ secrets.MP_RUT_PROVEEDOR }}
           MP_CODIGO_PROVEEDOR: ${{ secrets.MP_CODIGO_PROVEEDOR }}
+          SITE_USUARIOS: ${{ secrets.SITE_USUARIOS }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
@@ -64,12 +68,13 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           OC_SOLO_COMPRA_AGIL: ${{ vars.OC_SOLO_COMPRA_AGIL }}
           CA_URL_FICHA: ${{ vars.CA_URL_FICHA }}
+          DIAS_HISTORIAL_OC: ${{ vars.DIAS_HISTORIAL_OC }}
           PRUEBA: ${{ inputs.prueba }}
           COMPLETA: ${{ inputs.completa }}
         run: node src/run.js
 
-      - name: Guardar estado (rama "estado", un solo commit)
-        if: ${{ !cancelled() && hashFiles('data/db.json') != '' }}
+      - name: Guardar estado cifrado (rama "estado", un solo commit)
+        if: ${{ !cancelled() && hashFiles('data/db.enc') != '' }}
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -77,7 +82,7 @@ jobs:
           git init -q -b estado
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add db.json
+          git add db.enc
           git commit -qm "Estado $(date -u +%Y-%m-%dT%H:%MZ)"
           git push -qf "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" estado
 
