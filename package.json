@@ -1,0 +1,21 @@
+{
+  "name": "compras-agiles",
+  "version": "2.0.0",
+  "description": "Buscador de Compras Ágiles de Mercado Público con alertas de órdenes de compra, sin servidor (GitHub Actions + GitHub Pages)",
+  "private": true,
+  "scripts": {
+    "actualizar": "node src/run.js",
+    "ver": "node src/ver-local.js",
+    "mock": "node mock/mock-mp.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.15"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0"
+  }
+}
