@@ -108,6 +108,72 @@
   input[type=password] { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; font: inherit; background: #fff; color: var(--ink); }
   th.num { text-align: right; }
   .det .acc { margin-top: 14px; display: flex; align-items: center; gap: 12px; }
+  /* Lista desplegable de selección múltiple (Sector) */
+  .dd { position: relative; }
+  .dd-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font: inherit; color: var(--ink); cursor: pointer; text-align: left; }
+  .dd-btn:focus-visible, .dd.abierto .dd-btn { outline: 2px solid var(--brand-soft); border-color: var(--brand); }
+  .dd-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dd-btn svg { flex: none; transition: transform .15s; }
+  .dd.abierto .dd-btn svg { transform: rotate(180deg); }
+  .dd-panel { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid var(--line); border-radius: 9px; box-shadow: 0 10px 24px rgba(0,0,0,.12); padding: 6px; }
+  .dd-list { max-height: 300px; overflow: auto; }
+  .dd-op { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+  .dd-op:hover { background: var(--bg); }
+  .dd-op input { width: 16px; height: 16px; accent-color: var(--brand); margin: 0; }
+  .dd-op small { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .dd-pie { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); margin-top: 6px; padding: 8px 4px 2px; }
+  /* Campos de fecha dd/mm/aaaa con calendario */
+  .fecha { position: relative; display: flex; }
+  .fecha .fecha-txt { width: 100%; padding: 7px 34px 7px 9px; border: 1px solid var(--line); border-radius: 7px; font: inherit; font-variant-numeric: tabular-nums; background: #fff; color: var(--ink); }
+  .fecha .fecha-txt:focus { outline: 2px solid var(--brand-soft); border-color: var(--brand); }
+  .fecha .fecha-txt.mal { border-color: var(--danger); outline-color: var(--danger-soft); }
+  .fecha-cal { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border: 0; background: none; cursor: pointer; display: grid; place-items: center; border-radius: 6px; color: var(--muted); }
+  .fecha-cal:hover { background: var(--bg); color: var(--brand); }
+  .fecha-nat { position: absolute; right: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }
+  .aviso-fecha { color: var(--warn); font-size: 12px; margin-top: 4px; }
+  .aviso-fecha:empty { display: none; }
+  /* Filtros activos */
+  .activos { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: #fbfcfa; }
+  .activos:empty { display: none; }
+  .activo { display: inline-flex; align-items: center; gap: 6px; background: var(--brand-soft); color: var(--brand); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 12.5px; }
+  .activo button { border: 0; background: none; color: inherit; cursor: pointer; width: 20px; height: 20px; border-radius: 50%; font-size: 14px; line-height: 1; }
+  .activo button:hover { background: rgba(11,107,58,.15); }
+  .activos .linkbtn { font-size: 12.5px; margin-left: 4px; }
+  .excluir-sector { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 8px; padding: 7px 10px; border: 1px dashed var(--line); border-radius: 7px; background: #fff; font: inherit; font-size: 13.5px; color: var(--muted); cursor: pointer; text-align: left; }
+  .excluir-sector:hover { border-color: var(--danger); color: var(--danger); }
+  .excluir-sector[aria-pressed="true"] { border-style: solid; border-color: var(--danger); background: var(--danger-soft); color: var(--danger); font-weight: 600; }
+  .excluir-sector .ico { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid currentColor; display: grid; place-items: center; font-size: 11px; line-height: 1; flex: none; }
+  .activo.ex { background: var(--danger-soft); color: var(--danger); }
+  /* Monitor de consumo de la API */
+  .c-cuerpo { padding: 16px 18px 18px; }
+  .c-cuerpo h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 22px 0 10px; font-weight: 600; }
+  .veredicto { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+  .veredicto .ico { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px; flex: none; }
+  .veredicto.ok { background: var(--brand-soft); color: #0a4d2b; } .veredicto.ok .ico { background: var(--brand); }
+  .veredicto.warn { background: var(--warn-soft); color: #7a3e06; } .veredicto.warn .ico { background: var(--warn); }
+  .veredicto.crit { background: var(--danger-soft); color: #8a1b12; } .veredicto.crit .ico { background: var(--danger); }
+  .c-medidor { margin-top: 14px; }
+  .c-barra { position: relative; height: 14px; border-radius: 7px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+  .c-barra .hoy { position: absolute; inset: 0 auto 0 0; background: var(--brand); border-radius: 7px 0 0 7px; }
+  .c-barra .proy { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(11,107,58,.28) 0 4px, transparent 4px 8px); }
+  .c-escala { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .c-leyenda { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 6px; flex-wrap: wrap; }
+  .c-leyenda i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+  .c-graf { position: relative; height: 180px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; align-items: end; border-bottom: 1px solid var(--line); padding-top: 18px; }
+  .c-graf .col { position: relative; height: 100%; display: flex; align-items: flex-end; cursor: default; }
+  .c-graf .col:hover .b { filter: brightness(.85); }
+  .c-graf .b { width: 100%; max-width: 22px; margin: 0 auto; background: #5aa57c; border-radius: 4px 4px 0 0; min-height: 1px; }
+  .c-graf .col.hoy .b { background: var(--brand); }
+  .c-graf .lim { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--danger); pointer-events: none; }
+  .c-graf .lim span { position: absolute; right: 0; top: -17px; font-size: 11px; color: var(--danger); background: var(--panel); padding: 0 4px; }
+  .c-ejes { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .c-ejes span { text-align: center; white-space: nowrap; overflow: visible; }
+  .c-tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: #fff; font-size: 12px; padding: 7px 9px; border-radius: 6px; line-height: 1.4; display: none; }
+  .c-fila { display: grid; grid-template-columns: 210px minmax(0, 1fr) 110px; gap: 12px; align-items: center; padding: 5px 0; font-size: 13.5px; }
+  .c-fila .pista { height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; }
+  .c-fila .pista span { display: block; height: 100%; background: var(--brand); border-radius: 5px; }
+  .c-fila .n { text-align: right; font-variant-numeric: tabular-nums; }
+  @media (max-width: 600px) { .c-fila { grid-template-columns: 1fr 80px; } .c-fila .pista { grid-column: 1 / -1; grid-row: 2; } }
   #app { display: none; }
   body.dentro #login { display: none; } body.dentro #app { display: block; }
   .user { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
@@ -158,7 +224,7 @@
     <button data-v="estado">Estado y alertas</button>
   </nav>
   <div class="status"><span class="dot" id="dot"></span><span id="statusTxt">Cargando…</span>
-    <a class="btn" id="btnSync" target="_blank" rel="noopener" title="Abre GitHub para ejecutar una actualización ahora">Actualizar ahora</a>
+    <a class="btn" id="btnSync" target="_blank" rel="noopener" title="Buscar Compras Ágiles y órdenes de compra nuevas ahora">Actualizar ahora</a>
     <span class="user"><span id="quien"></span><button class="btn" id="btnSalir">Salir</button></span></div>
 </header>
 
@@ -171,15 +237,21 @@
       <input type="text" id="q" placeholder="ej: guantes, toner, catering">
       <input type="text" id="excluir" placeholder="excluir palabras…" style="margin-top:6px"></div>
 
-    <div class="f"><span class="lbl">Sector</span><div class="chips" id="sectores"></div></div>
+    <div class="f"><span class="lbl" id="lblSector">Sector</span>
+      <div class="dd" id="ddSector">
+        <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lblSector"><span class="dd-txt">Todos los sectores</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="dd-panel" hidden><div class="dd-list" id="sectores" role="listbox" aria-multiselectable="true"></div>
+          <div class="dd-pie"><button type="button" class="linkbtn" data-acc="limpiar">Quitar selección</button><button type="button" class="btn primary" data-acc="cerrar">Listo</button></div></div>
+      </div>
+      <button type="button" class="excluir-sector" id="exSalud" aria-pressed="false" title="Oculta las Compras Ágiles clasificadas en el sector Salud"><span class="ico" aria-hidden="true">✕</span><span>Excluir Salud</span></button></div>
 
     <div class="f"><span class="lbl">Fecha de publicación</span>
-      <div class="dates"><span>Desde</span><input type="date" id="pubDesde"><span>Hasta</span><input type="date" id="pubHasta"></div>
-      <div class="quick" data-target="pub"><button data-d="0">Hoy</button><button data-d="1">Desde ayer</button><button data-d="3">Últimos 3 días</button></div></div>
+      <div class="dates"><span>Desde</span><div class="fecha"><input type="text" class="fecha-txt" data-para="pubDesde" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Publicada desde"><button type="button" class="fecha-cal" data-para="pubDesde" aria-label="Abrir calendario: Publicada desde"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button><input type="date" id="pubDesde" class="fecha-nat" tabindex="-1" aria-hidden="true"></div><span>Hasta</span><div class="fecha"><input type="text" class="fecha-txt" data-para="pubHasta" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Publicada hasta"><button type="button" class="fecha-cal" data-para="pubHasta" aria-label="Abrir calendario: Publicada hasta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button><input type="date" id="pubHasta" class="fecha-nat" tabindex="-1" aria-hidden="true"></div></div><div class="aviso-fecha" id="avisoPub"></div>
+      <div class="quick" data-target="pub"><button data-d="0">Hoy</button><button data-d="1">Desde ayer</button><button data-d="3">Últimos 3 días</button><button data-d="7">Últimos 7 días</button><button data-d="x">Quitar</button></div></div>
 
     <div class="f"><span class="lbl">Fecha de cierre</span>
-      <div class="dates"><span>Desde</span><input type="date" id="cierreDesde"><span>Hasta</span><input type="date" id="cierreHasta"></div>
-      <div class="quick" data-target="cierre"><button data-d="0">Cierra hoy</button><button data-d="1">Hoy o mañana</button><button data-d="3">Próx. 3 días</button><button data-d="7">Próx. 7 días</button></div></div>
+      <div class="dates"><span>Desde</span><div class="fecha"><input type="text" class="fecha-txt" data-para="cierreDesde" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Cierra desde"><button type="button" class="fecha-cal" data-para="cierreDesde" aria-label="Abrir calendario: Cierra desde"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button><input type="date" id="cierreDesde" class="fecha-nat" tabindex="-1" aria-hidden="true"></div><span>Hasta</span><div class="fecha"><input type="text" class="fecha-txt" data-para="cierreHasta" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Cierra hasta"><button type="button" class="fecha-cal" data-para="cierreHasta" aria-label="Abrir calendario: Cierra hasta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button><input type="date" id="cierreHasta" class="fecha-nat" tabindex="-1" aria-hidden="true"></div></div><div class="aviso-fecha" id="avisoCierre"></div>
+      <div class="quick" data-target="cierre"><button data-d="0">Cierra hoy</button><button data-d="1">Hoy o mañana</button><button data-d="3">Próx. 3 días</button><button data-d="7">Próx. 7 días</button><button data-d="x">Quitar</button></div></div>
 
     <div class="f"><span class="lbl">Presupuesto disponible (CLP)</span>
       <div class="row2"><input type="number" id="montoMin" placeholder="Mínimo" min="0" step="50000"><input type="number" id="montoMax" placeholder="Máximo" min="0" step="50000"></div>
@@ -205,6 +277,7 @@
       </select>
       <button class="btn" id="csv">Exportar CSV</button>
     </div>
+    <div class="activos" id="activos"></div>
     <div id="lista"></div>
     <div class="pager" id="pager"></div>
   </section>
@@ -220,9 +293,10 @@
     <div class="f"><span class="lbl">Estado</span><div class="chips" id="oEstados"></div></div>
     <div class="f"><label for="oTipo">Tipo</label><select id="oTipo">
       <option value="">Todas</option><option value="ag">Solo Compra Ágil</option><option value="otras">Otras (convenio marco, licitación, trato directo…)</option></select></div>
-    <div class="f"><span class="lbl">Fecha de envío</span>
-      <div class="dates"><span>Desde</span><input type="date" id="oDesde"><span>Hasta</span><input type="date" id="oHasta"></div>
-      <div class="quick" id="oFechaQuick"><button data-p="7">Últimos 7 días</button><button data-p="30">Últimos 30 días</button><button data-p="mes">Este mes</button><button data-p="anio">Este año</button></div></div>
+    <div class="f"><label for="oFechaTipo">Fecha</label>
+      <select id="oFechaTipo" style="margin-bottom:6px"><option value="envio">Fecha de envío</option><option value="aceptacion">Fecha de aceptación</option><option value="creacion">Fecha de creación</option></select>
+      <div class="dates"><span>Desde</span><div class="fecha"><input type="text" class="fecha-txt" data-para="oDesde" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Órdenes desde"><button type="button" class="fecha-cal" data-para="oDesde" aria-label="Abrir calendario: Órdenes desde"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button><input type="date" id="oDesde" class="fecha-nat" tabindex="-1" aria-hidden="true"></div><span>Hasta</span><div class="fecha"><input type="text" class="fecha-txt" data-para="oHasta" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off" aria-label="Órdenes hasta"><button type="button" class="fecha-cal" data-para="oHasta" aria-label="Abrir calendario: Órdenes hasta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button><input type="date" id="oHasta" class="fecha-nat" tabindex="-1" aria-hidden="true"></div></div><div class="aviso-fecha" id="avisoOC"></div>
+      <div class="quick" id="oFechaQuick"><button data-p="0">Hoy</button><button data-p="7">Últimos 7 días</button><button data-p="30">Últimos 30 días</button><button data-p="mes">Este mes</button><button data-p="mesant">Mes anterior</button><button data-p="anio">Este año</button><button data-p="x">Quitar</button></div></div>
     <div class="f"><span class="lbl">Monto (CLP)</span>
       <div class="row2"><input type="number" id="oMin" placeholder="Mínimo" min="0" step="50000"><input type="number" id="oMax" placeholder="Máximo" min="0" step="50000"></div></div>
     <div class="f"><label for="oComprador">Comprador</label><select id="oComprador"><option value="">Todos</option></select></div>
@@ -245,8 +319,9 @@
       </select>
       <button class="btn" id="oCsv">Exportar CSV</button>
     </div>
+    <div class="activos" id="oActivos"></div>
     <div class="tabla-scroll"><table class="octable">
-      <thead><tr><th>Fecha</th><th>Orden de compra</th><th class="opc">Comprador</th><th>Estado</th><th class="num">Monto</th></tr></thead>
+      <thead><tr><th id="oColFecha">Envío</th><th>Orden de compra</th><th class="opc">Comprador</th><th>Estado</th><th class="num">Monto</th></tr></thead>
       <tbody id="oLista"></tbody>
     </table></div>
     <div class="pager" id="oPager"></div>
@@ -255,13 +330,35 @@
 </section>
 
 <!-- ─── ESTADO ─── -->
-<section class="view" id="v-estado"><div class="wrap"><div class="panel">
+<section class="view" id="v-estado"><div class="wrap">
+<div class="panel" style="margin-bottom:20px">
+  <h2>Consumo diario de la API <span class="sp"></span><span class="meta" id="cHora" style="font-weight:400;font-size:13px"></span></h2>
+  <div class="kpis" id="cKpis"></div>
+  <div class="c-cuerpo">
+    <div class="veredicto" id="cVeredicto" role="status"></div>
+    <div class="c-medidor" aria-hidden="true">
+      <div class="c-barra"><span class="proy" id="cProyBar"></span><span class="hoy" id="cHoyBar"></span></div>
+      <div class="c-escala"><span>0</span><span id="cLimTxt"></span></div>
+      <div class="c-leyenda"><span><i style="background:var(--brand)"></i>Usado hoy</span><span><i style="background:repeating-linear-gradient(135deg, rgba(11,107,58,.45) 0 3px, transparent 3px 6px);border:1px solid rgba(11,107,58,.4)"></i>Proyección hasta medianoche</span></div>
+    </div>
+    <h3>Consultas por día · últimos 30 días</h3>
+    <div class="c-graf" id="cGraf" role="img" aria-label="Gráfico de consultas diarias a la API"></div>
+    <div class="c-ejes" id="cEjes" aria-hidden="true"></div>
+    <h3>¿En qué se usan las consultas de hoy?</h3>
+    <div id="cDesglose"></div>
+    <details style="margin-top:16px"><summary class="meta" style="cursor:pointer">Ver tabla por día</summary><div class="tabla-scroll" id="cTabla"></div></details>
+    <p class="meta" style="margin:16px 0 0">Cuenta las consultas que hace la plataforma desde GitHub (incluidos los reintentos), por día en hora de Chile. No incluye consultas hechas con el mismo ticket desde otros lugares, como tu navegador. El límite de referencia es de 10.000 diarias por ticket; si se superara, ese día dejarían de llegar datos nuevos hasta el día siguiente.</p>
+  </div>
+</div>
+<div class="c-tip" id="cTip"></div>
+<div class="panel">
   <h2>Estado del sistema</h2>
   <div class="kv" id="cfg"></div>
   <div class="meta" style="padding:0 18px 18px">
     <p>El sitio se actualiza solo cada 15 minutos mediante GitHub Actions; GitHub puede atrasar algunas ejecuciones.
     Cuando un organismo le emite a tu empresa una orden de compra de Compra Ágil, el aviso llega por los canales activos.</p>
-    <p>Para enviar un <b>mensaje de prueba</b> o forzar una actualización: botón <i>Actualizar ahora</i> → <i>Run workflow</i> (requiere tu sesión de GitHub).</p>
+    <p>El botón <b>Actualizar ahora</b> busca en el momento las Compras Ágiles y órdenes de compra nuevas; tarda entre 1 y 3 minutos y el listado se recarga solo al terminar. Con el sitio abierto, los datos nuevos de las actualizaciones automáticas también aparecen solos (se revisa cada 2 minutos).</p>
+    <p>Para enviar un <b>mensaje de prueba</b>: en GitHub, pestaña <i>Actions</i> → <i>Actualizar Compras Ágiles</i> → <i>Run workflow</i>.</p>
     <p>Los datos del sitio están cifrados: solo se pueden leer después de ingresar con un usuario y clave válidos.</p>
   </div>
 </div></div></section>
@@ -334,12 +431,7 @@ document.querySelectorAll('nav button').forEach((b) => b.onclick = () => {
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
   try { history.replaceState(null, '', '#' + b.dataset.v); } catch {}
 });
-(() => {
-  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
-  const repo = location.pathname.split('/').filter(Boolean)[0];
-  if (m) $('#btnSync').href = `https://github.com/${m[1]}/${repo && repo !== 'index.html' ? repo : m[1] + '.github.io'}/actions/workflows/actualizar.yml`;
-  else $('#btnSync').style.display = 'none';
-})();
+// (el botón "Actualizar ahora" se configura en prepararBoton(), al cargar los datos)
 function descargarCSV(nombre, cols, filas) {
   const e = (v) => `"${String(Array.isArray(v) ? v.join(' | ') : v ?? '').replace(/"/g, '""')}"`;
   const csv = '﻿' + [cols.map((c) => c[0]).join(';'), ...filas.map((f) => cols.map((c) => e(c[1](f))).join(';'))].join('\r\n');
@@ -353,6 +445,86 @@ function paginador(el, total, pagina, ir) {
   el.querySelectorAll('button').forEach((b) => b.onclick = () => { ir(pagina + Number(b.dataset.p)); scrollTo(0, 0); });
 }
 
+// ═══ Campos de fecha (dd/mm/aaaa) ═══
+// Cada campo tiene un texto visible en formato chileno y un <input type="date"> oculto que guarda
+// el valor real (AAAA-MM-DD) y abre el calendario. Los filtros leen siempre el valor oculto.
+const isoATexto = (iso) => (iso ? iso.split('-').reverse().join('/') : '');
+function textoAIso(t) {
+  const m = String(t).trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})$/);
+  if (!m) return null;
+  const d = +m[1], mo = +m[2], a = m[3].length === 2 ? 2000 + +m[3] : +m[3];
+  const dt = new Date(a, mo - 1, d);
+  if (dt.getFullYear() !== a || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+  return `${a}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+function setFecha(id, iso, avisar = true) {
+  const nat = $('#' + id); nat.value = iso || '';
+  const t = document.querySelector(`.fecha-txt[data-para="${id}"]`);
+  if (t) { t.value = isoATexto(nat.value); t.classList.remove('mal'); }
+  if (avisar) nat.dispatchEvent(new Event('input', { bubbles: true }));
+}
+document.querySelectorAll('.fecha-txt').forEach((t) => {
+  t.addEventListener('input', (e) => {
+    e.stopPropagation();
+    let v = t.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 4) v = `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`; else if (v.length > 2) v = `${v.slice(0, 2)}/${v.slice(2)}`;
+    t.value = v;
+    const nat = $('#' + t.dataset.para);
+    if (!v) { t.classList.remove('mal'); if (nat.value) { nat.value = ''; nat.dispatchEvent(new Event('input', { bubbles: true })); } return; }
+    const iso = v.length === 10 ? textoAIso(v) : null;
+    t.classList.toggle('mal', v.length === 10 && !iso);
+    if (iso && iso !== nat.value) { nat.value = iso; nat.dispatchEvent(new Event('input', { bubbles: true })); }
+  });
+  t.addEventListener('blur', () => { if (t.value && !textoAIso(t.value)) t.classList.add('mal'); });
+});
+document.querySelectorAll('.fecha-cal').forEach((b) => b.onclick = () => {
+  const n = $('#' + b.dataset.para);
+  try { n.showPicker(); } catch { n.style.pointerEvents = 'auto'; n.focus(); n.click(); n.style.pointerEvents = ''; }
+});
+document.querySelectorAll('.fecha-nat').forEach((n) => n.addEventListener('change', () => setFecha(n.id, n.value)));
+// Rango de fechas: si "Desde" es posterior a "Hasta" se invierten y se avisa
+function rango(idDesde, idHasta, idAviso) {
+  let a = $('#' + idDesde).value, b = $('#' + idHasta).value;
+  const invertido = a && b && a > b;
+  if (invertido) [a, b] = [b, a];
+  $('#' + idAviso).textContent = invertido ? '"Desde" era posterior a "Hasta": se buscó entre ambas fechas.' : '';
+  return [a || null, b || null];
+}
+const textoRango = (a, b) => a && b ? (a === b ? isoATexto(a) : `${isoATexto(a)} – ${isoATexto(b)}`) : a ? `desde ${isoATexto(a)}` : `hasta ${isoATexto(b)}`;
+
+// ═══ Lista desplegable de selección múltiple ═══
+function desplegable(id, { opciones, seleccion, todos, alCambiar }) {
+  const dd = $('#' + id), btn = dd.querySelector('.dd-btn'), panel = dd.querySelector('.dd-panel'), lista = dd.querySelector('.dd-list');
+  const abrir = (si) => { panel.hidden = !si; dd.classList.toggle('abierto', si); btn.setAttribute('aria-expanded', si); };
+  const texto = () => {
+    const sel = opciones().filter((o) => seleccion().has(o.id));
+    dd.querySelector('.dd-txt').textContent = !sel.length ? todos : sel.length <= 2 ? sel.map((o) => o.nombre).join(', ') : `${sel.length} seleccionados`;
+  };
+  const pintar = (conteo = {}) => {
+    lista.innerHTML = opciones().map((o) => `<label class="dd-op" role="option" aria-selected="${seleccion().has(o.id)}"><input type="checkbox" value="${esc(o.id)}" ${seleccion().has(o.id) ? 'checked' : ''}><span>${esc(o.nombre)}</span>${conteo[o.id] != null ? `<small>${conteo[o.id]}</small>` : ''}</label>`).join('');
+    texto();
+  };
+  btn.onclick = () => abrir(panel.hidden);
+  lista.addEventListener('change', (e) => {
+    const v = e.target.value; seleccion().has(v) ? seleccion().delete(v) : seleccion().add(v);
+    e.target.closest('.dd-op').setAttribute('aria-selected', seleccion().has(v)); texto(); alCambiar();
+  });
+  dd.querySelector('[data-acc="limpiar"]').onclick = () => { seleccion().clear(); lista.querySelectorAll('input').forEach((i) => { i.checked = false; }); texto(); alCambiar(); };
+  dd.querySelector('[data-acc="cerrar"]').onclick = () => { abrir(false); btn.focus(); };
+  document.addEventListener('click', (e) => { if (!dd.contains(e.target)) abrir(false); });
+  dd.addEventListener('keydown', (e) => { if (e.key === 'Escape') { abrir(false); btn.focus(); } });
+  return { pintar, abierto: () => !panel.hidden };
+}
+
+// ═══ Filtros activos (chips con ✕ sobre los resultados) ═══
+function pintarActivos(idCont, items, limpiarTodo) {
+  const c = $('#' + idCont);
+  c.innerHTML = items.map((it, i) => `<span class="activo${it.ex ? ' ex' : ''}">${esc(it.txt)}<button type="button" data-i="${i}" aria-label="Quitar filtro: ${esc(it.txt)}">×</button></span>`).join('')
+    + (items.length > 1 ? '<button type="button" class="linkbtn" data-todo="1">Quitar todos</button>' : '');
+  c.querySelectorAll('button[data-i]').forEach((b) => b.onclick = () => items[+b.dataset.i].quitar());
+  const t = c.querySelector('[data-todo]'); if (t) t.onclick = limpiarTodo;
+}
+
 // ═══ COMPRAS ÁGILES ═══
 const SECTORES = [
   ['salud', 'Salud'], ['educacion', 'Educación'], ['tecnologia', 'Tecnología'], ['construccion', 'Construcción y obras'],
@@ -364,17 +536,26 @@ const REGIONES = [[15, 'Arica y Parinacota'], [1, 'Tarapacá'], [2, 'Antofagasta
   [13, 'Metropolitana'], [6, "O'Higgins"], [7, 'Maule'], [16, 'Ñuble'], [8, 'Biobío'], [9, 'Araucanía'], [14, 'Los Ríos'],
   [10, 'Los Lagos'], [11, 'Aysén'], [12, 'Magallanes']];
 
-let COMPRAS = [], selSectores = new Set(), page = 1, resCompras = [];
+let COMPRAS = [], selSectores = new Set(), page = 1, resCompras = [], excluirSalud = false;
+function pintarExcluirSalud() {
+  const b = $('#exSalud'); b.setAttribute('aria-pressed', excluirSalud);
+  b.querySelector('span:last-child').textContent = excluirSalud ? 'Salud excluida (clic para incluir)' : 'Excluir Salud';
+}
+$('#exSalud').onclick = () => { excluirSalud = !excluirSalud; pintarExcluirSalud(); buscarLuego(); };
 const campos = ['q', 'excluir', 'pubDesde', 'pubHasta', 'cierreDesde', 'cierreHasta', 'montoMin', 'montoMax', 'region', 'llamado', 'orden'];
+// Las fechas no se recuerdan entre visitas (un "Hoy" de ayer daría resultados confusos)
+const camposFecha = ['pubDesde', 'pubHasta', 'cierreDesde', 'cierreHasta'];
 function guardarFiltros() {
-  const p = {}; for (const c of campos) p[c] = $('#' + c).value;
-  p.sector = [...selSectores]; p.sinMonto = $('#sinMonto').checked;
+  const p = {}; for (const c of campos) if (!camposFecha.includes(c)) p[c] = $('#' + c).value;
+  p.sector = [...selSectores]; p.sinMonto = $('#sinMonto').checked; p.excluirSalud = excluirSalud;
   almacen.set('ca-filtros', JSON.stringify(p), true);
 }
 function restaurarFiltros() {
   let p = {}; try { p = JSON.parse(localStorage.getItem('ca-filtros') || '{}'); } catch {}
-  for (const c of campos) if (p[c] != null) $('#' + c).value = p[c];
+  for (const c of campos) if (p[c] != null && !camposFecha.includes(c)) $('#' + c).value = p[c];
   selSectores = new Set(p.sector || []); $('#sinMonto').checked = p.sinMonto !== false;
+  excluirSalud = p.excluirSalud === true; pintarExcluirSalud();
+  camposFecha.forEach((c) => setFecha(c, '', false));
   if (!$('#orden').value) $('#orden').value = 'cierre_asc';
 }
 function filtrarCompras() {
@@ -382,10 +563,12 @@ function filtrarCompras() {
   const terminos = norm(f.q).split(/\s+/).filter(Boolean), excluir = norm(f.excluir).split(/\s+/).filter(Boolean);
   const mMin = f.montoMin ? Number(f.montoMin) : null, mMax = f.montoMax ? Number(f.montoMax) : null, sinMonto = $('#sinMonto').checked;
   const d = (v, fin) => (v ? v + (fin ? 'T23:59:59' : 'T00:00:00') : null);
-  const pD = d(f.pubDesde), pH = d(f.pubHasta, true), cD = d(f.cierreDesde), cH = d(f.cierreHasta, true);
+  const [pa, pb] = rango('pubDesde', 'pubHasta', 'avisoPub'), [ca, cb] = rango('cierreDesde', 'cierreHasta', 'avisoCierre');
+  const pD = d(pa), pH = d(pb, true), cD = d(ca), cH = d(cb, true);
   const region = f.region ? Number(f.region) : null, ahora = horaChile();
   const out = COMPRAS.filter((c) => {
     if (c.fechaCierre && c.fechaCierre < ahora) return false;
+    if (excluirSalud && c.sectores.includes('salud')) return false;
     if (selSectores.size && !c.sectores.some((s) => selSectores.has(s))) return false;
     if (region && c.regionId !== region) return false;
     if (f.llamado && c.convocatoria !== Number(f.llamado)) return false;
@@ -411,27 +594,42 @@ function filtrarCompras() {
 }
 let tC;
 const buscarLuego = () => { clearTimeout(tC); tC = setTimeout(() => { page = 1; buscar(); }, 150); };
-document.querySelectorAll('#filtros input, #filtros select, #orden').forEach((el) => el.addEventListener('input', buscarLuego));
+document.querySelectorAll('#filtros input:not(.fecha-txt), #filtros select, #orden').forEach((el) => el.addEventListener('input', buscarLuego));
 document.querySelectorAll('.quick[data-target]').forEach((q) => q.onclick = (e) => {
   const d = e.target.dataset.d; if (d == null) return;
+  const [ini, fin] = q.dataset.target === 'pub' ? ['pubDesde', 'pubHasta'] : ['cierreDesde', 'cierreHasta'];
+  if (d === 'x') { setFecha(ini, '', false); setFecha(fin, '', false); buscarLuego(); return; }
   const hoy = new Date(), otra = new Date();
-  if (q.dataset.target === 'pub') { otra.setDate(hoy.getDate() - d); $('#pubDesde').value = isoDia(otra); $('#pubHasta').value = isoDia(hoy); }
-  else { otra.setDate(hoy.getDate() + Number(d)); $('#cierreDesde').value = isoDia(hoy); $('#cierreHasta').value = isoDia(otra); }
+  if (q.dataset.target === 'pub') { otra.setDate(hoy.getDate() - Number(d)); setFecha(ini, isoDia(otra), false); setFecha(fin, isoDia(hoy), false); }
+  else { otra.setDate(hoy.getDate() + Number(d)); setFecha(ini, isoDia(hoy), false); setFecha(fin, isoDia(otra), false); }
   buscarLuego();
 });
 $('#montoQuick').onclick = (e) => { const r = e.target.dataset.r; if (!r) return; const [a, b] = r.split('-'); $('#montoMin').value = a; $('#montoMax').value = b; buscarLuego(); };
-$('#limpiar').onclick = () => { campos.forEach((c) => c !== 'orden' && ($('#' + c).value = '')); selSectores.clear(); $('#sinMonto').checked = true; buscarLuego(); };
+// "Limpiar filtros" no quita "Excluir Salud": es una preferencia que se quita con su propio botón
+function limpiarCompras() { campos.forEach((c) => c !== 'orden' && ($('#' + c).value = '')); camposFecha.forEach((c) => setFecha(c, '', false)); selSectores.clear(); $('#sinMonto').checked = true; page = 1; buscar(); }
+$('#limpiar').onclick = limpiarCompras;
 $('#csv').onclick = () => descargarCSV('compras-agiles.csv', [
   ['codigo', (c) => c.codigo], ['nombre', (c) => c.nombre], ['organismo', (c) => c.organismo], ['unidad', (c) => c.unidad], ['region', (c) => c.region],
   ['sectores', (c) => c.sectores], ['llamado', (c) => c.convocatoria], ['montoCLP', (c) => c.montoCLP], ['publicacion', (c) => c.fechaPublicacion],
   ['cierre', (c) => c.fechaCierre], ['link', (c) => 'https://compra-agil.mercadopublico.cl/resumen-cotizacion/' + c.codigo]], resCompras);
 
-function pintarSectores(conteo = {}) {
-  $('#sectores').innerHTML = SECTORES.map((s) =>
-    `<span class="chip ${selSectores.has(s.id) ? 'on' : ''}" data-id="${s.id}">${esc(s.nombre)}${conteo[s.id] != null ? `<small>${conteo[s.id]}</small>` : ''}</span>`).join('');
-  document.querySelectorAll('#sectores .chip').forEach((c) => c.onclick = () => {
-    selSectores.has(c.dataset.id) ? selSectores.delete(c.dataset.id) : selSectores.add(c.dataset.id); c.classList.toggle('on'); buscarLuego();
-  });
+const ddSector = desplegable('ddSector', { opciones: () => SECTORES, seleccion: () => selSectores, todos: 'Todos los sectores', alCambiar: buscarLuego });
+// Mientras la lista está abierta no se vuelve a dibujar (para no mover lo que se está marcando)
+function pintarSectores(conteo = {}) { if (!ddSector.abierto()) ddSector.pintar(conteo); }
+function activosCompras() {
+  const it = [], f = (id) => $('#' + id).value;
+  const nombre = Object.fromEntries(SECTORES.map((s) => [s.id, s.nombre]));
+  if (f('q')) it.push({ txt: `Palabras: ${f('q')}`, quitar: () => { $('#q').value = ''; buscarLuego(); } });
+  if (f('excluir')) it.push({ txt: `Excluye: ${f('excluir')}`, quitar: () => { $('#excluir').value = ''; buscarLuego(); } });
+  if (excluirSalud) it.push({ txt: 'Sin Salud', ex: true, quitar: () => { excluirSalud = false; pintarExcluirSalud(); buscarLuego(); } });
+  if (selSectores.size) it.push({ txt: `Sector: ${[...selSectores].map((x) => nombre[x] || x).join(', ')}`, quitar: () => { selSectores.clear(); ddSector.pintar(); buscarLuego(); } });
+  if (f('pubDesde') || f('pubHasta')) it.push({ txt: `Publicada ${textoRango(...rango('pubDesde', 'pubHasta', 'avisoPub'))}`, quitar: () => { setFecha('pubDesde', '', false); setFecha('pubHasta', '', false); buscarLuego(); } });
+  if (f('cierreDesde') || f('cierreHasta')) it.push({ txt: `Cierra ${textoRango(...rango('cierreDesde', 'cierreHasta', 'avisoCierre'))}`, quitar: () => { setFecha('cierreDesde', '', false); setFecha('cierreHasta', '', false); buscarLuego(); } });
+  if (f('montoMin') || f('montoMax')) it.push({ txt: `Monto ${f('montoMin') ? 'desde ' + clp(+f('montoMin')) : ''} ${f('montoMax') ? 'hasta ' + clp(+f('montoMax')) : ''}`.replace(/\s+/g, ' ').trim(), quitar: () => { $('#montoMin').value = ''; $('#montoMax').value = ''; buscarLuego(); } });
+  if (!$('#sinMonto').checked) it.push({ txt: 'Solo con monto informado', quitar: () => { $('#sinMonto').checked = true; buscarLuego(); } });
+  if (f('region')) it.push({ txt: `Región: ${$('#region').selectedOptions[0].textContent}`, quitar: () => { $('#region').value = ''; buscarLuego(); } });
+  if (f('llamado')) it.push({ txt: f('llamado') === '2' ? 'Segundo llamado' : 'Primer llamado', quitar: () => { $('#llamado').value = ''; buscarLuego(); } });
+  pintarActivos('activos', it, limpiarCompras);
 }
 function badgeCierre(f) {
   if (!f) return '<span class="badge">Sin fecha</span>';
@@ -467,7 +665,7 @@ function buscar() {
   const montoTotal = res.reduce((s, c) => s + (c.montoCLP || 0), 0);
   $('#total').textContent = res.length.toLocaleString('es-CL');
   $('#montoTot').textContent = montoTotal ? `Presupuesto total: ${clp(montoTotal)}` : '';
-  pintarSectores(conteo);
+  pintarSectores(conteo); activosCompras();
   const nombreSector = Object.fromEntries(SECTORES.map((s) => [s.id, s.nombre]));
   const items = res.slice((page - 1) * 50, page * 50);
   $('#lista').innerHTML = items.length ? items.map((c) => `
@@ -495,21 +693,25 @@ function buscar() {
 
 // ═══ ÓRDENES DE COMPRA ═══
 let ORDENES = [], OC_META = {}, selEstados = new Set(), oPage = 1, resOrdenes = [];
-const oCampos = ['oQ', 'oTipo', 'oDesde', 'oHasta', 'oMin', 'oMax', 'oComprador', 'oRegion', 'oOrden'];
+const oCampos = ['oQ', 'oTipo', 'oFechaTipo', 'oDesde', 'oHasta', 'oMin', 'oMax', 'oComprador', 'oRegion', 'oOrden'];
+const TIPOS_FECHA = { envio: 'Envío', aceptacion: 'Aceptación', creacion: 'Creación' };
 const claseEstado = (c) => ({ '6': 'e-ok', '12': 'e-ok', '4': 'e-pend', '5': 'e-pend', '13': 'e-rec', '14': 'e-rec', '15': 'e-rec', '9': 'e-can' }[c] || '');
 const fechaOC = (o) => o.fechaEnvio || o.fechaCreacion || '';
+// Fecha que usan el filtro, el orden y la columna, según lo elegido en "Fecha"
+const fechaSel = (o) => ({ envio: fechaOC(o), aceptacion: o.fechaAceptacion || '', creacion: o.fechaCreacion || '' }[$('#oFechaTipo').value] ?? fechaOC(o));
 
 function filtrarOrdenes() {
   const f = {}; for (const c of oCampos) f[c] = $('#' + c).value;
   const terminos = norm(f.oQ).split(/\s+/).filter(Boolean);
   const mMin = f.oMin ? Number(f.oMin) : null, mMax = f.oMax ? Number(f.oMax) : null;
+  const [fDesde, fHasta] = rango('oDesde', 'oHasta', 'avisoOC');
   const out = ORDENES.filter((o) => {
     if (selEstados.size && !selEstados.has(o.estado || 'Sin estado')) return false;
     if (f.oTipo === 'ag' && !o.compraAgil) return false;
     if (f.oTipo === 'otras' && o.compraAgil) return false;
-    const fe = fechaOC(o).slice(0, 10);
-    if (f.oDesde && (!fe || fe < f.oDesde)) return false;
-    if (f.oHasta && (!fe || fe > f.oHasta)) return false;
+    const fe = String(fechaSel(o)).slice(0, 10);
+    if (fDesde && (!fe || fe < fDesde)) return false;
+    if (fHasta && (!fe || fe > fHasta)) return false;
     if (mMin != null && (o.total ?? 0) < mMin) return false;
     if (mMax != null && (o.total ?? 0) > mMax) return false;
     if (f.oComprador && o.comprador !== f.oComprador) return false;
@@ -521,26 +723,43 @@ function filtrarOrdenes() {
     return true;
   });
   const orden = {
-    fecha_desc: (a, b) => fechaOC(b).localeCompare(fechaOC(a)),
-    fecha_asc: (a, b) => fechaOC(a).localeCompare(fechaOC(b)),
+    fecha_desc: (a, b) => String(fechaSel(b) || '').localeCompare(String(fechaSel(a) || '')),
+    fecha_asc: (a, b) => String(fechaSel(a) || '9').localeCompare(String(fechaSel(b) || '9')),
     monto_desc: (a, b) => (b.total ?? -1) - (a.total ?? -1),
     monto_asc: (a, b) => (a.total ?? Infinity) - (b.total ?? Infinity),
     comprador: (a, b) => (a.comprador || '').localeCompare(b.comprador || '', 'es'),
-  }[f.oOrden] || ((a, b) => fechaOC(b).localeCompare(fechaOC(a)));
+  }[f.oOrden] || ((a, b) => String(fechaSel(b) || '').localeCompare(String(fechaSel(a) || '')));
   return out.sort(orden);
 }
 let tO;
 const buscarOCLuego = () => { clearTimeout(tO); tO = setTimeout(() => { oPage = 1; buscarOC(); }, 150); };
-document.querySelectorAll('#oFiltros input, #oFiltros select, #oOrden').forEach((el) => el.addEventListener('input', buscarOCLuego));
+document.querySelectorAll('#oFiltros input:not(.fecha-txt), #oFiltros select, #oOrden').forEach((el) => el.addEventListener('input', buscarOCLuego));
 $('#oFechaQuick').onclick = (e) => {
   const p = e.target.dataset.p; if (!p) return;
-  const hoy = new Date(); let desde = new Date();
+  if (p === 'x') { setFecha('oDesde', '', false); setFecha('oHasta', '', false); buscarOCLuego(); return; }
+  const hoy = new Date(); let desde = new Date(), hasta = new Date();
   if (p === 'mes') desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  else if (p === 'mesant') { desde = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1); hasta = new Date(hoy.getFullYear(), hoy.getMonth(), 0); }
   else if (p === 'anio') desde = new Date(hoy.getFullYear(), 0, 1);
   else desde.setDate(hoy.getDate() - Number(p));
-  $('#oDesde').value = isoDia(desde); $('#oHasta').value = isoDia(hoy); buscarOCLuego();
+  setFecha('oDesde', isoDia(desde), false); setFecha('oHasta', isoDia(hasta), false); buscarOCLuego();
 };
-$('#oLimpiar').onclick = () => { oCampos.forEach((c) => c !== 'oOrden' && ($('#' + c).value = '')); selEstados.clear(); buscarOCLuego(); };
+function limpiarOC() {
+  oCampos.forEach((c) => !['oOrden', 'oFechaTipo'].includes(c) && ($('#' + c).value = ''));
+  setFecha('oDesde', '', false); setFecha('oHasta', '', false); selEstados.clear(); oPage = 1; buscarOC();
+}
+$('#oLimpiar').onclick = limpiarOC;
+function activosOC() {
+  const it = [], f = (id) => $('#' + id).value;
+  if (f('oQ')) it.push({ txt: `Buscar: ${f('oQ')}`, quitar: () => { $('#oQ').value = ''; buscarOCLuego(); } });
+  if (selEstados.size) it.push({ txt: `Estado: ${[...selEstados].join(', ')}`, quitar: () => { selEstados.clear(); buscarOCLuego(); } });
+  if (f('oTipo')) it.push({ txt: f('oTipo') === 'ag' ? 'Solo Compra Ágil' : 'Otras (no Compra Ágil)', quitar: () => { $('#oTipo').value = ''; buscarOCLuego(); } });
+  if (f('oDesde') || f('oHasta')) it.push({ txt: `${TIPOS_FECHA[f('oFechaTipo')] || 'Envío'} ${textoRango(...rango('oDesde', 'oHasta', 'avisoOC'))}`, quitar: () => { setFecha('oDesde', '', false); setFecha('oHasta', '', false); buscarOCLuego(); } });
+  if (f('oMin') || f('oMax')) it.push({ txt: `Monto ${f('oMin') ? 'desde ' + clp(+f('oMin')) : ''} ${f('oMax') ? 'hasta ' + clp(+f('oMax')) : ''}`.replace(/\s+/g, ' ').trim(), quitar: () => { $('#oMin').value = ''; $('#oMax').value = ''; buscarOCLuego(); } });
+  if (f('oComprador')) it.push({ txt: `Comprador: ${f('oComprador')}`, quitar: () => { $('#oComprador').value = ''; buscarOCLuego(); } });
+  if (f('oRegion')) it.push({ txt: `Región: ${f('oRegion')}`, quitar: () => { $('#oRegion').value = ''; buscarOCLuego(); } });
+  pintarActivos('oActivos', it, limpiarOC);
+}
 $('#oCsv').onclick = () => descargarCSV('ordenes-de-compra.csv', [
   ['codigo', (o) => o.codigo], ['nombre', (o) => o.nombre], ['estado', (o) => o.estado], ['tipo', (o) => o.tipo], ['compraAgil', (o) => o.compraAgil ? 'Sí' : 'No'],
   ['compraAgilOrigen', (o) => o.licitacion], ['comprador', (o) => o.comprador], ['unidad', (o) => o.unidad], ['region', (o) => o.region],
@@ -563,7 +782,7 @@ function detalleOC(o) {
       <div>Comprador</div><div>${esc(o.comprador)}${o.unidad ? ' · ' + esc(o.unidad) : ''}${o.region ? ' · ' + esc(o.region) : ''}</div>
       <div>Contacto</div><div>${o.contacto && (o.contacto.nombre || o.contacto.mail || o.contacto.fono) ? esc([o.contacto.nombre, o.contacto.mail, o.contacto.fono].filter(Boolean).join(' · ')) : '–'}</div>
       <div>Tipo</div><div>${o.compraAgil ? 'Compra Ágil' : esc(o.tipo || '–')}${o.licitacion ? ' · origen ' + esc(o.licitacion) : ''}</div>
-      <div>Fechas</div><div>Envío ${fmtDia(fechaOC(o))}${o.fechaAceptacion ? ' · aceptada ' + fmtDia(o.fechaAceptacion) : ''}${o.fechaCancelacion ? ' · cancelada ' + fmtDia(o.fechaCancelacion) : ''}</div>
+      <div>Fechas</div><div>${o.fechaCreacion ? 'Creada ' + fmtDia(o.fechaCreacion) + ' · ' : ''}enviada ${fmtDia(fechaOC(o))}${o.fechaAceptacion ? ' · aceptada ' + fmtDia(o.fechaAceptacion) : ''}${o.fechaCancelacion ? ' · cancelada ' + fmtDia(o.fechaCancelacion) : ''}</div>
       <div>Montos</div><div>Neto ${clp(o.totalNeto) || '–'} · impuestos ${clp(o.impuestos) || '–'} · total <b>${clp(o.total) || '–'}</b></div>
       ${o.aviso ? `<div>Aviso</div><div>${esc(o.aviso)}${o.detalleAviso ? ' · ' + esc(o.detalleAviso) : ''}</div>` : ''}
     </div>
@@ -573,7 +792,8 @@ function detalleOC(o) {
 function buscarOC() {
   const res = resOrdenes = filtrarOrdenes();
   const conteo = {}; for (const o of res) conteo[o.estado || 'Sin estado'] = (conteo[o.estado || 'Sin estado'] || 0) + 1;
-  pintarEstados(conteo);
+  pintarEstados(conteo); activosOC();
+  $('#oColFecha').textContent = TIPOS_FECHA[$('#oFechaTipo').value] || 'Envío';
   const suma = (arr) => arr.reduce((s, o) => s + (o.total || 0), 0);
   const ok = res.filter((o) => ['6', '12', '13', '14', '15'].includes(o.codigoEstado));
   const pend = res.filter((o) => ['4', '5'].includes(o.codigoEstado));
@@ -590,7 +810,7 @@ function buscarOC() {
   const items = res.slice((oPage - 1) * 50, oPage * 50);
   $('#oLista').innerHTML = items.length ? items.map((o) => `
     <tr class="fila" data-cod="${esc(o.codigo)}">
-      <td class="nw">${fmtDia(fechaOC(o))}</td>
+      <td class="nw">${fechaSel(o) ? fmtDia(fechaSel(o)) : '<span class="meta">–</span>'}</td>
       <td><b>${esc(o.codigo)}</b>${o.compraAgil ? ' <span class="tag s">Compra Ágil</span>' : o.tipo ? ` <span class="tag">${esc(o.tipo)}</span>` : ''}<div class="meta">${esc(o.nombre)}</div></td>
       <td class="opc">${esc(o.comprador)}</td>
       <td><span class="est ${claseEstado(o.codigoEstado)}">${esc(o.estado || '–')}</span></td>
@@ -612,11 +832,76 @@ function llenarSelectsOC() {
 }
 
 // ═══ Estado ═══
+// ═══ Monitor de consumo de la API ═══
+function pintarConsumo(e) {
+  const lim = e.limiteDiario || 10000, dias = e.consumo || [];
+  const diaChile = (d) => d.toLocaleDateString('sv-SE', { timeZone: 'America/Santiago' });
+  const hoyIso = diaChile(new Date(e.generado));
+  // Serie continua de 30 días (los días sin ejecuciones quedan en 0)
+  const porDia = Object.fromEntries(dias.map((d) => [d.dia, d]));
+  const serie = [];
+  for (let i = 29; i >= 0; i--) { const d = diaChile(new Date(new Date(e.generado).getTime() - i * 864e5)); serie.push(porDia[d] || { dia: d, total: 0, compras: 0, detalles: 0, ordenes: 0, ejecuciones: 0, rapidas: 0 }); }
+  const hoy = porDia[hoyIso] || serie[serie.length - 1];
+  // Proyección: lo usado hoy, al ritmo actual, hasta medianoche (hora de Chile)
+  const ahoraCL = new Date(new Date(e.generado).toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+  const fraccion = (ahoraCL.getHours() * 60 + ahoraCL.getMinutes()) / 1440;
+  const previos = serie.slice(0, -1).filter((d) => d.total > 0);
+  const prom7 = previos.slice(-7).length ? Math.round(previos.slice(-7).reduce((s, d) => s + d.total, 0) / previos.slice(-7).length) : null;
+  const proy = fraccion >= 0.1 ? Math.round(hoy.total / fraccion) : prom7 != null ? Math.max(hoy.total, prom7) : null;
+  const maxDia = serie.reduce((m, d) => (d.total > m.total ? d : m), serie[0]);
+  const n = (x) => (x == null ? '–' : Math.round(x).toLocaleString('es-CL'));
+  const pct = (x) => (x == null ? '' : `${Math.round((x / lim) * 100)}%`);
+
+  $('#cHora').textContent = `Datos al ${fmtFecha(e.generado)}`;
+  $('#cKpis').innerHTML = [
+    [n(hoy.total), `Consultas hoy · ${pct(hoy.total)} del límite`],
+    [n(proy), proy != null ? `Proyección del día · ${pct(proy)}` : 'Proyección del día (aún sin datos)'],
+    [n(prom7), 'Promedio diario (últimos 7 días)'],
+    [n(maxDia.total), maxDia.total ? `Día más alto · ${fmtDia(maxDia.dia + 'T12:00:00')}` : 'Día más alto'],
+  ].map(([b, t]) => `<div class="kpi"><b>${b}</b><span>${esc(t)}</span></div>`).join('');
+
+  const ref = proy ?? hoy.total, nivel = ref / lim;
+  const [cls, ico, txt] = nivel >= 0.9 ? ['crit', '!', `Atención: al ritmo actual hoy se usarían ${n(ref)} consultas (${pct(ref)} del límite). Conviene bajar el detalle diario (DETALLE_MAX_DIA) o la frecuencia.`]
+    : nivel >= 0.7 ? ['warn', '!', `Consumo alto: se proyectan ${n(ref)} consultas hoy (${pct(ref)} del límite). Todavía alcanza, pero hay poco margen.`]
+    : ['ok', '✓', `Vas bien: se proyectan ${n(ref)} consultas hoy, ${pct(ref)} del límite de ${n(lim)}. Te sobran unas ${n(lim - ref)}.`];
+  const v = $('#cVeredicto'); v.className = 'veredicto ' + cls; v.innerHTML = `<span class="ico" aria-hidden="true">${ico}</span><span>${esc(txt)}</span>`;
+  $('#cHoyBar').style.width = Math.min(100, (hoy.total / lim) * 100) + '%';
+  $('#cProyBar').style.width = Math.min(100, ((proy ?? hoy.total) / lim) * 100) + '%';
+  $('#cLimTxt').textContent = `Límite ${n(lim)}`;
+
+  // Gráfico de barras: escala hasta el límite (o el día más alto si lo supera)
+  const tope = Math.max(lim, maxDia.total) * 1.02;
+  const g = $('#cGraf');
+  g.innerHTML = serie.map((d, i) => `<div class="col${d.dia === hoyIso ? ' hoy' : ''}" data-i="${i}"><div class="b" style="height:${d.total ? Math.max(1.5, (d.total / tope) * 100) : 0}%"></div></div>`).join('')
+    + `<div class="lim" style="bottom:${(lim / tope) * 100}%"><span>Límite ${n(lim)}</span></div>`;
+  $('#cEjes').innerHTML = serie.map((d, i) => `<span>${i % 5 === 4 || d.dia === hoyIso ? (d.dia === hoyIso ? 'Hoy' : d.dia.slice(8, 10) + '/' + d.dia.slice(5, 7)) : ''}</span>`).join('');
+  const tip = $('#cTip');
+  g.querySelectorAll('.col').forEach((c) => {
+    c.onmousemove = (ev) => {
+      const d = serie[+c.dataset.i];
+      tip.innerHTML = `<b>${fmtDia(d.dia + 'T12:00:00')}${d.dia === hoyIso ? ' (hoy, en curso)' : ''}</b><br>${n(d.total)} consultas · ${pct(d.total)}<br>${d.ejecuciones || 0} ejecuciones${d.rapidas ? ` (${d.rapidas} desde el botón)` : ''}`;
+      tip.style.display = 'block';
+      tip.style.left = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8) + 'px'; tip.style.top = (ev.clientY - tip.offsetHeight - 10) + 'px';
+    };
+    c.onmouseleave = () => { tip.style.display = 'none'; };
+  });
+
+  const partes = [['compras', 'Listado de Compras Ágiles'], ['detalles', 'Detalle de Compras Ágiles'], ['ordenes', 'Órdenes de compra']];
+  $('#cDesglose').innerHTML = partes.map(([k, t]) => {
+    const x = hoy[k] || 0, p = hoy.total ? (x / hoy.total) * 100 : 0;
+    return `<div class="c-fila"><span>${t}</span><div class="pista"><span style="width:${p}%"></span></div><span class="n">${n(x)} · ${Math.round(p)}%</span></div>`;
+  }).join('') + `<p class="meta" style="margin:8px 0 0">${hoy.ejecuciones || 0} ejecuciones hoy${hoy.rapidas ? `, ${hoy.rapidas} desde el botón "Actualizar ahora"` : ''}.</p>`;
+
+  $('#cTabla').innerHTML = `<table><thead><tr><th>Día</th><th class="num">Consultas</th><th class="num">% límite</th><th class="num">Listado</th><th class="num">Detalle</th><th class="num">Órdenes</th><th class="num">Ejecuciones</th></tr></thead><tbody>${
+    serie.slice().reverse().filter((d) => d.total || d.dia === hoyIso).map((d) => `<tr><td>${fmtDia(d.dia + 'T12:00:00')}</td><td class="num">${n(d.total)}</td><td class="num">${pct(d.total)}</td><td class="num">${n(d.compras)}</td><td class="num">${n(d.detalles)}</td><td class="num">${n(d.ordenes)}</td><td class="num">${d.ejecuciones || 0}</td></tr>`).join('')}</tbody></table>`;
+}
+
 function pintarEstado(e) {
   if (!e) { $('#dot').className = 'dot err'; $('#statusTxt').textContent = 'Sin datos todavía'; return; }
   const viejo = Date.now() - new Date(e.generado) > 75 * 60e3;
   $('#dot').className = 'dot ' + (/^Error/.test(e.mensajeSync || '') || viejo ? 'err' : 'ok');
   $('#statusTxt').textContent = `${e.compras.toLocaleString('es-CL')} abiertas · actualizado ${fmtFecha(e.generado)}`;
+  try { pintarConsumo(e); } catch (err) { console.warn('monitor de consumo', err); }
   const si = (v, txt) => v ? `<span class="ok">${txt || 'Activo'}</span>` : '<span class="no">No configurado</span>';
   const h = e.historialOC || {};
   $('#cfg').innerHTML = `
@@ -625,7 +910,7 @@ function pintarEstado(e) {
     <div>Con detalle descargado</div><div>${e.conDetalle.toLocaleString('es-CL')} de ${e.compras.toLocaleString('es-CL')}</div>
     <div>Empresa</div><div>${e.proveedor ? esc(`${e.proveedor.nombre || ''} (código ${e.proveedor.codigo})`) : e.ocActivo ? 'Configurada por código de proveedor' : si(false)}</div>
     <div>Monitor de órdenes de compra</div><div>${e.ocActivo ? `<span class="ok">Activo</span> · última revisión ${fmtFecha(e.ultimaRevisionOC)}` : si(false)}${e.errorOC ? ` <span class="no">(${esc(e.errorOC)})</span>` : ''}</div>
-    <div>Historial de órdenes</div><div>${e.ordenes} órdenes${h.hasta ? ` · descargado hasta ${fmtDia(h.hasta + 'T12:00:00')}${h.completo ? ' (completo)' : ` (avanzando hacia ${e.diasHistorialOC} días atrás)`}` : ''}</div>
+    <div>Historial de órdenes</div><div>${e.ordenes} órdenes${h.hasta ? ` · descargado hasta ${fmtDia(h.hasta + 'T12:00:00')}${h.completo ? ' (completo)' : ` (avanzando hacia ${e.diasHistorialOC} días atrás)`}` : ''}${h.error && !h.completo ? ` <span class="meta">· último problema: ${esc(h.error)}</span>` : ''}</div>
     <div>Órdenes que se avisan</div><div>${e.ocSoloCompraAgil ? 'Solo las de Compra Ágil (tipo AG)' : 'Todas'}</div>
     <div>Email</div><div>${si(e.canales.email)}</div>
     <div>WhatsApp (CallMeBot)</div><div>${si(e.canales.whatsapp)}</div>
@@ -633,18 +918,100 @@ function pintarEstado(e) {
 }
 
 // ═══ Carga de datos ═══
-let generado = null;
-async function cargarTodo(forzar) {
-  const [c, o, e] = await Promise.all([leerCifrado('data/compras.enc'), leerCifrado('data/ordenes.enc').catch(() => null), leerCifrado('data/estado.enc').catch(() => null)]);
-  if (!forzar && c.generado === generado) return false;
-  generado = c.generado; COMPRAS = c.items;
+let generado = null, DISPARO = null;
+async function cargarTodo() {
+  const [c, o, e, d] = await Promise.all([leerCifrado('data/compras.enc'), leerCifrado('data/ordenes.enc').catch(() => null),
+    leerCifrado('data/estado.enc').catch(() => null), leerCifrado('data/disparo.enc').catch(() => null)]);
+  COMPRAS = c.items;
   ORDENES = o ? o.items : []; OC_META = o ? { proveedor: o.proveedor, historial: o.historial } : {};
   if (e) OC_META.activo = e.ocActivo;
-  pintarEstado(e); llenarSelectsOC();
-  return true;
+  generado = e ? e.generado : c.generado;
+  DISPARO = d && d.token && d.repo ? d : null;
+  pintarEstado(e); llenarSelectsOC(); prepararBoton();
 }
+// Revisión liviana: solo descarga el estado (pocos bytes) y compara la hora de publicación
+async function hayDatosNuevos() {
+  try { const e = await leerCifrado('data/estado.enc'); return e.generado !== generado; } catch { return false; }
+}
+async function recargar(aviso) {
+  await cargarTodo(); buscar(); buscarOC();
+  if (aviso) toast(aviso);
+}
+
+// ═══ Botón "Actualizar ahora" ═══
+// Con el permiso GH_DISPARO_TOKEN lanza la actualización en GitHub desde aquí mismo y sigue
+// su avance; sin él, abre la página del workflow en GitHub (comportamiento anterior).
+let actualizando = false;
+function linkGitHub() {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const repo = location.pathname.split('/').filter(Boolean)[0];
+  return m ? `https://github.com/${m[1]}/${repo && repo !== 'index.html' ? repo : m[1] + '.github.io'}/actions/workflows/actualizar.yml` : '';
+}
+function prepararBoton() {
+  const b = $('#btnSync');
+  if (DISPARO) { b.removeAttribute('href'); b.removeAttribute('target'); b.style.display = ''; b.style.cursor = 'pointer'; }
+  else { const l = linkGitHub(); if (l) { b.href = l; b.target = '_blank'; b.style.display = ''; } else b.style.display = 'none'; }
+}
+const gh = (ruta, opts = {}) => fetch(`https://api.github.com/repos/${DISPARO.repo}${ruta}`, {
+  ...opts, headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${DISPARO.token}`, 'X-GitHub-Api-Version': '2022-11-28', ...(opts.headers || {}) },
+});
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+function estadoBoton(txt, clase) {
+  $('#btnSync').textContent = txt;
+  if (clase) $('#dot').className = 'dot ' + clase;
+}
+async function actualizarAhora() {
+  if (actualizando) return;
+  actualizando = true;
+  const b = $('#btnSync'); b.setAttribute('aria-busy', 'true');
+  const inicio = Date.now(), previo = generado;
+  try {
+    estadoBoton('Solicitando…', 'run');
+    const r = await gh(`/actions/workflows/${DISPARO.workflow}/dispatches`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: DISPARO.ref, inputs: { rapida: 'true' } }),
+    });
+    if (r.status === 401 || r.status === 403 || r.status === 404) throw new Error('permiso');
+    if (!r.ok) throw new Error('GitHub respondió ' + r.status);
+
+    // Busca la ejecución recién creada y sigue su avance
+    let run = null;
+    while (Date.now() - inicio < 15 * 60e3) {
+      await esperar(run ? 8000 : 4000);
+      if (!run) {
+        const l = await gh(`/actions/workflows/${DISPARO.workflow}/runs?event=workflow_dispatch&per_page=5`).then((x) => x.json()).catch(() => null);
+        run = l && (l.workflow_runs || []).find((x) => new Date(x.created_at).getTime() >= inicio - 60e3);
+        estadoBoton('En cola…');
+        continue;
+      }
+      run = await gh(`/actions/runs/${run.id}`).then((x) => x.json()).catch(() => run);
+      const min = Math.max(1, Math.round((Date.now() - inicio) / 60e3));
+      if (run.status === 'queued' || run.status === 'waiting' || run.status === 'pending') estadoBoton('En cola (hay otra actualización en curso)…');
+      else if (run.status !== 'completed') estadoBoton(`Actualizando… ${min} min`);
+      else break;
+    }
+    if (!run || run.status !== 'completed') throw new Error('La actualización está tardando más de lo normal. Los datos se cargarán solos cuando termine.');
+    if (run.conclusion !== 'success') throw new Error(`La actualización terminó con error. Revisa el detalle en GitHub: ${run.html_url}`);
+
+    // El sitio se republica al final de la ejecución: espera a que lleguen los datos nuevos
+    estadoBoton('Publicando…');
+    for (let i = 0; i < 24 && !(await hayDatosNuevos()); i++) await esperar(5000);
+    if (generado === previo && !(await hayDatosNuevos())) throw new Error('La actualización terminó; los datos nuevos aparecerán en un par de minutos.');
+    await recargar('Listo: datos actualizados');
+  } catch (e) {
+    if (e.message === 'permiso') {
+      toast('El permiso para actualizar no es válido o venció (secret GH_DISPARO_TOKEN). Se abrirá GitHub.');
+      const l = linkGitHub(); if (l) window.open(l, '_blank', 'noopener');
+    } else toast(e.message);
+  } finally {
+    actualizando = false; b.removeAttribute('aria-busy'); estadoBoton('Actualizar ahora');
+    try { pintarEstado(await leerCifrado('data/estado.enc')); } catch {}
+  }
+}
+$('#btnSync').addEventListener('click', (e) => { if (!DISPARO) return; e.preventDefault(); actualizarAhora(); });
+
 async function abrirApp() {
-  try { await cargarTodo(true); }
+  try { await cargarTodo(); }
   catch (err) { salir(/HTTP 404/.test(err.message) ? 'Todavía no hay datos publicados. Espera a que termine la actualización en GitHub.' : 'Tu sesión ya no es válida (¿cambiaron las claves?). Ingresa de nuevo.'); return; }
   document.body.classList.add('dentro');
   $('#quien').textContent = almacen.get('ca-usuario') || '';
@@ -659,10 +1026,13 @@ async function abrirApp() {
   const guardada = almacen.get('ca-llave');
   if (guardada) { try { LLAVE = await importar(b64(guardada)); await abrirApp(); } catch { salir(); } }
   else $('#lUsuario').focus();
-  setInterval(async () => {
-    if (!LLAVE || document.hidden) return;
-    try { if (await cargarTodo(false)) { buscar(); buscarOC(); toast('Datos actualizados'); } } catch {}
-  }, 5 * 60e3);
+  // Cada 2 minutos revisa si GitHub publicó datos nuevos; si los hay, recarga el listado solo
+  const revisarNuevos = async () => {
+    if (!LLAVE || document.hidden || actualizando) return;
+    try { if (await hayDatosNuevos()) await recargar('Datos actualizados'); } catch {}
+  };
+  setInterval(revisarNuevos, 2 * 60e3);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) revisarNuevos(); });
 })();
 }
 </script>
