@@ -31,11 +31,16 @@ async function email(asunto, texto, html) {
   return { canal: 'email', ok: true };
 }
 
+const paraWhatsApp = (t) => String(t).replace(/\$\s*(?=\d)/g, 'CLP ');
+
 async function whatsapp(texto) {
   if (!cfg.callmebot.length) return { canal: 'whatsapp', omitido: 'sin configurar' };
-  if (cfg.dryRun) { console.log(`[dry-run whatsapp → ${cfg.callmebot.map((x) => x.phone)}]\n${texto}`); return { canal: 'whatsapp', ok: true, dryRun: true }; }
+  if (cfg.dryRun) { console.log(`[dry-run whatsapp → ${cfg.callmebot.map((x) => x.phone)}]\n${paraWhatsApp(texto)}`); return { canal: 'whatsapp', ok: true, dryRun: true }; }
+  // CallMeBot interpreta "$" + número como un código y borra ambos ("$139.218" llegaba como "39.218").
+  // Por eso en WhatsApp los montos van como "CLP 139.218" (solo se cambia el "$" que va antes de un número).
+  const textoWA = paraWhatsApp(texto);
   for (const { phone, apikey } of cfg.callmebot) {
-    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&apikey=${encodeURIComponent(apikey)}&text=${encodeURIComponent(texto)}`;
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&apikey=${encodeURIComponent(apikey)}&text=${encodeURIComponent(textoWA)}`;
     const r = await fetch(url, { signal: AbortSignal.timeout(30000) });
     const body = await r.text();
     if (!r.ok || /error|invalid|not (allowed|activated)/i.test(body.slice(0, 500))) throw new Error(`CallMeBot ${r.status}: ${body.replace(/<[^>]+>/g, ' ').trim().slice(0, 200)}`);
@@ -74,4 +79,4 @@ async function notificarOC(oc) {
   return r;
 }
 
-module.exports = { notificarOC, textoOC };
+module.exports = { notificarOC, textoOC, paraWhatsApp };
