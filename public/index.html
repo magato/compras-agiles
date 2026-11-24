@@ -235,7 +235,8 @@
   <aside class="panel" id="filtros">
     <div class="f"><label for="q">Palabras clave</label>
       <input type="text" id="q" placeholder="ej: guantes, toner, catering">
-      <input type="text" id="excluir" placeholder="excluir palabras…" style="margin-top:6px"></div>
+      <input type="text" id="excluir" placeholder="excluir palabras…" style="margin-top:6px">
+      <button type="button" class="excluir-sector" id="exVetadas" aria-pressed="false" hidden><span class="ico" aria-hidden="true">✕</span><span>Excluir palabras vetadas</span></button></div>
 
     <div class="f"><span class="lbl" id="lblSector">Sector</span>
       <div class="dd" id="ddSector">
@@ -537,6 +538,18 @@ const REGIONES = [[15, 'Arica y Parinacota'], [1, 'Tarapacá'], [2, 'Antofagasta
   [10, 'Los Lagos'], [11, 'Aysén'], [12, 'Magallanes']];
 
 let COMPRAS = [], selSectores = new Set(), page = 1, resCompras = [], excluirSalud = false;
+// Botón "Excluir palabras vetadas": oculta las compras que el servidor marcó con una palabra
+// de la lista (arriendo, servicio, salud, hospital, cesfam…; ver src/exclusiones.js)
+let excluirVetadas = false, PALABRAS_VETADAS = [];
+function pintarExcluirVetadas() {
+  const b = $('#exVetadas'), n = COMPRAS.filter((c) => c.vetada).length;
+  b.hidden = !PALABRAS_VETADAS.length;
+  b.setAttribute('aria-pressed', excluirVetadas);
+  b.title = `Oculta las Compras Ágiles cuyo título, institución, descripción o productos contienen: ${PALABRAS_VETADAS.join(', ')}`;
+  const cuantas = n ? ` (${n.toLocaleString('es-CL')})` : '';
+  b.querySelector('span:last-child').textContent = excluirVetadas ? `Palabras vetadas excluidas${cuantas} · clic para incluir` : `Excluir palabras vetadas${cuantas}`;
+}
+$('#exVetadas').onclick = () => { excluirVetadas = !excluirVetadas; pintarExcluirVetadas(); buscarLuego(); };
 function pintarExcluirSalud() {
   const b = $('#exSalud'); b.setAttribute('aria-pressed', excluirSalud);
   b.querySelector('span:last-child').textContent = excluirSalud ? 'Salud excluida (clic para incluir)' : 'Excluir Salud';
@@ -547,7 +560,7 @@ const campos = ['q', 'excluir', 'pubDesde', 'pubHasta', 'cierreDesde', 'cierreHa
 const camposFecha = ['pubDesde', 'pubHasta', 'cierreDesde', 'cierreHasta'];
 function guardarFiltros() {
   const p = {}; for (const c of campos) if (!camposFecha.includes(c)) p[c] = $('#' + c).value;
-  p.sector = [...selSectores]; p.sinMonto = $('#sinMonto').checked; p.excluirSalud = excluirSalud;
+  p.sector = [...selSectores]; p.sinMonto = $('#sinMonto').checked; p.excluirSalud = excluirSalud; p.excluirVetadas = excluirVetadas;
   almacen.set('ca-filtros', JSON.stringify(p), true);
 }
 function restaurarFiltros() {
@@ -555,6 +568,7 @@ function restaurarFiltros() {
   for (const c of campos) if (p[c] != null && !camposFecha.includes(c)) $('#' + c).value = p[c];
   selSectores = new Set(p.sector || []); $('#sinMonto').checked = p.sinMonto !== false;
   excluirSalud = p.excluirSalud === true; pintarExcluirSalud();
+  excluirVetadas = p.excluirVetadas === true; pintarExcluirVetadas();
   camposFecha.forEach((c) => setFecha(c, '', false));
   if (!$('#orden').value) $('#orden').value = 'cierre_asc';
 }
@@ -569,6 +583,7 @@ function filtrarCompras() {
   const out = COMPRAS.filter((c) => {
     if (c.fechaCierre && c.fechaCierre < ahora) return false;
     if (excluirSalud && c.sectores.includes('salud')) return false;
+    if (excluirVetadas && PALABRAS_VETADAS.length && c.vetada) return false;
     if (selSectores.size && !c.sectores.some((s) => selSectores.has(s))) return false;
     if (region && c.regionId !== region) return false;
     if (f.llamado && c.convocatoria !== Number(f.llamado)) return false;
@@ -605,7 +620,7 @@ document.querySelectorAll('.quick[data-target]').forEach((q) => q.onclick = (e) 
   buscarLuego();
 });
 $('#montoQuick').onclick = (e) => { const r = e.target.dataset.r; if (!r) return; const [a, b] = r.split('-'); $('#montoMin').value = a; $('#montoMax').value = b; buscarLuego(); };
-// "Limpiar filtros" no quita "Excluir Salud": es una preferencia que se quita con su propio botón
+// "Limpiar filtros" no quita "Excluir Salud" ni "Excluir palabras vetadas": son preferencias que se quitan con su propio botón
 function limpiarCompras() { campos.forEach((c) => c !== 'orden' && ($('#' + c).value = '')); camposFecha.forEach((c) => setFecha(c, '', false)); selSectores.clear(); $('#sinMonto').checked = true; page = 1; buscar(); }
 $('#limpiar').onclick = limpiarCompras;
 $('#csv').onclick = () => descargarCSV('compras-agiles.csv', [
@@ -622,6 +637,7 @@ function activosCompras() {
   if (f('q')) it.push({ txt: `Palabras: ${f('q')}`, quitar: () => { $('#q').value = ''; buscarLuego(); } });
   if (f('excluir')) it.push({ txt: `Excluye: ${f('excluir')}`, quitar: () => { $('#excluir').value = ''; buscarLuego(); } });
   if (excluirSalud) it.push({ txt: 'Sin Salud', ex: true, quitar: () => { excluirSalud = false; pintarExcluirSalud(); buscarLuego(); } });
+  if (excluirVetadas && PALABRAS_VETADAS.length) it.push({ txt: 'Sin palabras vetadas', ex: true, quitar: () => { excluirVetadas = false; pintarExcluirVetadas(); buscarLuego(); } });
   if (selSectores.size) it.push({ txt: `Sector: ${[...selSectores].map((x) => nombre[x] || x).join(', ')}`, quitar: () => { selSectores.clear(); ddSector.pintar(); buscarLuego(); } });
   if (f('pubDesde') || f('pubHasta')) it.push({ txt: `Publicada ${textoRango(...rango('pubDesde', 'pubHasta', 'avisoPub'))}`, quitar: () => { setFecha('pubDesde', '', false); setFecha('pubHasta', '', false); buscarLuego(); } });
   if (f('cierreDesde') || f('cierreHasta')) it.push({ txt: `Cierra ${textoRango(...rango('cierreDesde', 'cierreHasta', 'avisoCierre'))}`, quitar: () => { setFecha('cierreDesde', '', false); setFecha('cierreHasta', '', false); buscarLuego(); } });
@@ -923,6 +939,7 @@ async function cargarTodo() {
   const [c, o, e, d] = await Promise.all([leerCifrado('data/compras.enc'), leerCifrado('data/ordenes.enc').catch(() => null),
     leerCifrado('data/estado.enc').catch(() => null), leerCifrado('data/disparo.enc').catch(() => null)]);
   COMPRAS = c.items;
+  PALABRAS_VETADAS = c.palabrasVetadas || []; pintarExcluirVetadas();
   ORDENES = o ? o.items : []; OC_META = o ? { proveedor: o.proveedor, historial: o.historial } : {};
   if (e) OC_META.activo = e.ocActivo;
   generado = e ? e.generado : c.generado;
