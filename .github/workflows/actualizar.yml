@@ -33,9 +33,6 @@ jobs:
   actualizar:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -103,7 +100,29 @@ jobs:
           name: github-pages-${{ github.run_attempt }}
           retention-days: 1
 
+  # La publicación va en un job aparte. Antes se publicaba en el mismo job justo después
+  # de subir el paquete y, a veces, GitHub todavía no lo veía y fallaba con
+  # 'No artifacts named "github-pages-N" were found'. Si aun así falla, reintenta una vez.
+  publicar:
+    needs: actualizar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy2.outputs.page_url }}
+    steps:
       - id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
+
+      - name: Esperar antes de reintentar
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 20
+
+      - id: deploy2
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
         with:
           artifact_name: github-pages-${{ github.run_attempt }}
