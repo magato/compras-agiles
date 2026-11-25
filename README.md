@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/35436137/README.md)
 # Compras Ágiles · Mercado Público (versión gratis en GitHub)
 
 Buscador de **Compras Ágiles abiertas** y de las **órdenes de compra de tu empresa**, protegido con **usuario y clave**, con avisos por **email, WhatsApp o Telegram** cuando un organismo le emite a tu empresa una **orden de compra de Compra Ágil**.
@@ -109,6 +110,8 @@ A partir de ese momento se actualiza solo cada 15 minutos. Puedes agregar un lin
   - **Órdenes de compra:** todas las OCs de tu empresa, en cualquier estado, con filtros por estado, tipo (Compra Ágil u otras), fecha, monto, comprador, región y texto; totales, detalle de productos y contacto del comprador, botón **IR** y exportación a CSV.
   - **Estado y alertas:** incluye el **monitor de consumo diario de la API**: consultas de hoy, proyección hasta medianoche, promedio de 7 días, gráfico de los últimos 30 días contra el límite de 10.000, y en qué se usan las consultas. Si el límite real de tu ticket fuera otro, configúralo en la variable `LIMITE_DIARIO_API`.
   Los filtros se aplican en tu navegador, así que son instantáneos.
+- **Órdenes por aceptar:** el botón **Órdenes de compra** muestra un círculo rojo con el número de órdenes en estado por aceptar (estados 4 y 5). El mismo número aparece en el título de la pestaña, por ejemplo `(2) Compras Ágiles`.
+- **Avisos de Chrome:** con el botón **🔔 Activar avisos** (arriba, o en *Estado y alertas*) el navegador muestra una notificación cuando llega una orden de compra nueva por aceptar. Al hacer clic se abre la orden en la sección Órdenes de compra. Los avisos llegan mientras el sitio esté abierto en alguna pestaña, aunque no la estés mirando. Solo se avisan las órdenes enviadas en los últimos 3 días, para que el historial antiguo que se descarga de a poco no genere avisos. Si cierras el navegador, siguen funcionando los avisos por email, WhatsApp o Telegram.
 - **Detalle de cada compra** (descripción y productos): se descarga de a poco (40 por ejecución, máximo 2.500 al día) para cuidar la cuota de **10.000 llamadas diarias** del ticket.
 - **Actualización en pantalla:** con el sitio abierto, cada 2 minutos se revisa si GitHub publicó datos nuevos y, si los hay, el listado se recarga solo. El botón **Actualizar ahora** lanza una actualización rápida en el momento (solo cambios recientes y órdenes de compra nuevas, sin la descarga completa diaria).
 - **Límite de tiempo:** cada ejecución tiene un máximo de 25 minutos (6 en la actualización rápida del botón). Si la API de Mercado Público está lenta, la ejecución guarda y publica lo avanzado, y lo pendiente sigue en la siguiente. Así nunca se pierde una ejecución completa por demoras de la API.
