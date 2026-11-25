@@ -198,6 +198,15 @@
   tr.detfila .det { border: 0; border-radius: 0; border-bottom: 1px solid var(--line); }
   .tabla-scroll { overflow-x: auto; }
   @media (max-width: 860px) { .octable .opc { display: none; } }
+  /* ─── Globo rojo con las órdenes de compra por aceptar ─── */
+  nav button { position: relative; }
+  nav button[data-v="ordenes"] { margin-right: 16px; }
+  .cuenta { position: absolute; top: -9px; right: -17px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+    background: #e0312b; color: #fff; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.28);
+    font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums; pointer-events: none; }
+  .cuenta[hidden] { display: none; }
+  .cuenta.pulso { animation: pulso .6s ease-out 2; }
+  @keyframes pulso { 50% { transform: scale(1.25); } }
 </style>
 </head>
 <body>
@@ -223,10 +232,11 @@
   <h1>Compras Ágiles <span>Mercado Público</span></h1>
   <nav>
     <button data-v="buscar" class="on">Compras Ágiles</button>
-    <button data-v="ordenes">Órdenes de compra</button>
+    <button data-v="ordenes">Órdenes de compra<span class="cuenta" id="ocCuenta" aria-hidden="true" hidden></span></button>
     <button data-v="estado">Estado y alertas</button>
   </nav>
   <div class="status"><span class="dot" id="dot"></span><span id="statusTxt">Cargando…</span>
+    <button class="btn" id="btnAvisos" hidden title="Recibir una notificación de Chrome cuando te asignen una orden de compra">🔔 Activar avisos</button>
     <a class="btn" id="btnSync" target="_blank" rel="noopener" title="Buscar Compras Ágiles y órdenes de compra nuevas ahora">Actualizar ahora</a>
     <span class="user"><span id="quien"></span><button class="btn" id="btnSalir">Salir</button></span></div>
 </header>
@@ -867,6 +877,96 @@ function llenarSelectsOC() {
   opts('#oRegion', [...new Set(ORDENES.map((o) => o.region).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es')), 'Todas');
 }
 
+// ═══ Órdenes por aceptar: globo rojo en el botón y avisos de Chrome ═══
+// "Por aceptar" = estados 4 y 5 de Mercado Público (los mismos del indicador "Por aceptar").
+const ESTADOS_PENDIENTES = ['4', '5'];
+const pendientes = () => ORDENES.filter((o) => ESTADOS_PENDIENTES.includes(o.codigoEstado));
+const TITULO = document.title;
+let cuentaPrevia = null;
+function pintarCuenta() {
+  const n = pendientes().length, el = $('#ocCuenta'), b = el.parentElement;
+  el.hidden = !n; el.textContent = n > 99 ? '99+' : String(n);
+  if (cuentaPrevia != null && n > cuentaPrevia) { el.classList.remove('pulso'); void el.offsetWidth; el.classList.add('pulso'); }
+  cuentaPrevia = n;
+  const txt = n ? `${n} orden${n > 1 ? 'es' : ''} de compra por aceptar` : '';
+  b.setAttribute('aria-label', n ? `Órdenes de compra: ${txt}` : 'Órdenes de compra');
+  b.title = txt;
+  document.title = n ? `(${n}) ${TITULO}` : TITULO;
+}
+
+const avisosPosibles = () => 'Notification' in window && window.isSecureContext;
+const avisosActivos = () => avisosPosibles() && Notification.permission === 'granted';
+function pintarBotonAvisos() {
+  $('#btnAvisos').hidden = !(avisosPosibles() && Notification.permission === 'default');
+}
+async function pedirPermisoAvisos() {
+  if (!avisosPosibles()) { toast('Este navegador no permite notificaciones en este sitio.'); return; }
+  const p = await Notification.requestPermission();
+  pintarBotonAvisos(); pintarFilaAvisos();
+  if (p === 'granted') notificar('Avisos activados', 'Te avisaremos aquí cuando te asignen una orden de compra.', 'ca-prueba', null, false);
+  else if (p === 'denied') toast('Bloqueaste los avisos. Para activarlos: candado junto a la dirección → Notificaciones → Permitir.');
+}
+$('#btnAvisos').onclick = pedirPermisoAvisos;
+
+// Ícono PNG para la notificación (Chrome no muestra íconos SVG)
+let ICONO = null;
+function iconoAviso() {
+  if (ICONO) return ICONO;
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d');
+    x.fillStyle = '#0b6b3a'; x.beginPath(); x.roundRect ? x.roundRect(0, 0, 128, 128, 28) : x.rect(0, 0, 128, 128); x.fill();
+    x.strokeStyle = '#fff'; x.lineWidth = 14; x.lineCap = 'round'; x.lineJoin = 'round';
+    x.beginPath(); x.moveTo(36, 68); x.lineTo(56, 88); x.lineTo(92, 44); x.stroke();
+    ICONO = c.toDataURL('image/png');
+  } catch { ICONO = undefined; }
+  return ICONO;
+}
+function irAOrdenes(codigo) {
+  window.focus();
+  document.querySelector('nav button[data-v="ordenes"]').click();
+  if (codigo) { $('#oQ').value = codigo; buscarOCLuego(); }
+}
+function notificar(titulo, cuerpo, tag, codigo, insistente = true) {
+  if (!avisosActivos()) return;
+  try {
+    const n = new Notification(titulo, { body: cuerpo, tag, icon: iconoAviso(), requireInteraction: insistente, lang: 'es-CL' });
+    n.onclick = () => { irAOrdenes(codigo); n.close(); };
+  } catch (err) { console.warn('aviso de Chrome', err); }
+}
+// Recuerda en este navegador qué órdenes por aceptar ya se conocían, para avisar solo las nuevas.
+// La primera vez que se abre el sitio en un navegador solo se guardan, sin avisar.
+const CLAVE_CONOCIDAS = 'ca-oc-pendientes-conocidas';
+function avisarOrdenesNuevas() {
+  const pend = pendientes();
+  let previas = null;
+  try { previas = JSON.parse(localStorage.getItem(CLAVE_CONOCIDAS) || 'null'); } catch {}
+  try { localStorage.setItem(CLAVE_CONOCIDAS, JSON.stringify(pend.map((o) => o.codigo))); } catch {}
+  if (!Array.isArray(previas)) return;
+  // Solo avisa las enviadas en los últimos 3 días: el historial antiguo que se va descargando
+  // de a poco suma al globo, pero no genera notificaciones.
+  const limite = isoDia(new Date(Date.now() - 3 * 864e5));
+  const nuevas = pend.filter((o) => !previas.includes(o.codigo) && String(fechaOC(o)).slice(0, 10) >= limite);
+  if (!nuevas.length) return;
+  toast(nuevas.length === 1 ? `Nueva orden de compra: ${nuevas[0].codigo}` : `${nuevas.length} órdenes de compra nuevas por aceptar`);
+  if (nuevas.length <= 3) {
+    for (const o of nuevas) {
+      notificar(`Nueva orden de compra${o.compraAgil ? ' · Compra Ágil' : ''}`,
+        [`${o.codigo} · ${o.comprador || ''}`, o.nombre, o.total != null ? `Total ${clp(o.total)} · por aceptar` : 'Por aceptar'].filter(Boolean).join('\n'),
+        'ca-oc-' + o.codigo, o.codigo);
+    }
+  } else {
+    notificar(`${nuevas.length} órdenes de compra nuevas`, `${nuevas.slice(0, 3).map((o) => o.codigo).join(', ')} y otras. Tienes ${pend.length} por aceptar.`, 'ca-oc-varias', null);
+  }
+}
+function filaAvisos() {
+  if (!avisosPosibles()) return '<span class="meta">No disponible en este navegador</span>';
+  if (Notification.permission === 'granted') return '<span class="ok">Activos</span> · llegan mientras el sitio esté abierto en alguna pestaña (aunque no la estés mirando)';
+  if (Notification.permission === 'denied') return '<span class="no">Bloqueados</span> · para activarlos: candado junto a la dirección → Notificaciones → Permitir, y recarga la página';
+  return '<button class="btn" data-avisos="1">🔔 Activar avisos</button>';
+}
+function pintarFilaAvisos() { const el = $('#filaAvisos'); if (el) el.innerHTML = filaAvisos(); }
+$('#cfg').addEventListener('click', (e) => { if (e.target.closest('[data-avisos]')) pedirPermisoAvisos(); });
+
 // ═══ Estado ═══
 // ═══ Monitor de consumo de la API ═══
 function pintarConsumo(e) {
@@ -950,7 +1050,8 @@ function pintarEstado(e) {
     <div>Órdenes que se avisan</div><div>${e.ocSoloCompraAgil ? 'Solo las de Compra Ágil (tipo AG)' : 'Todas'}</div>
     <div>Email</div><div>${si(e.canales.email)}</div>
     <div>WhatsApp (CallMeBot)</div><div>${si(e.canales.whatsapp)}</div>
-    <div>Telegram</div><div>${si(e.canales.telegram)}</div>`;
+    <div>Telegram</div><div>${si(e.canales.telegram)}</div>
+    <div>Avisos en este navegador</div><div id="filaAvisos">${filaAvisos()}</div>`;
 }
 
 // ═══ Carga de datos ═══
@@ -965,6 +1066,7 @@ async function cargarTodo() {
   generado = e ? e.generado : c.generado;
   DISPARO = d && d.token && d.repo ? d : null;
   pintarEstado(e); llenarSelectsOC(); prepararBoton();
+  pintarCuenta(); avisarOrdenesNuevas(); pintarBotonAvisos();
 }
 // Revisión liviana: solo descarga el estado (pocos bytes) y compara la hora de publicación
 async function hayDatosNuevos() {
@@ -1065,7 +1167,8 @@ async function abrirApp() {
   else $('#lUsuario').focus();
   // Cada 2 minutos revisa si GitHub publicó datos nuevos; si los hay, recarga el listado solo
   const revisarNuevos = async () => {
-    if (!LLAVE || document.hidden || actualizando) return;
+    // Con los avisos de Chrome activos se sigue revisando aunque la pestaña esté en segundo plano
+    if (!LLAVE || actualizando || (document.hidden && !avisosActivos())) return;
     try { if (await hayDatosNuevos()) await recargar('Datos actualizados'); } catch {}
   };
   setInterval(revisarNuevos, 2 * 60e3);
