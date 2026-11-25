@@ -87,6 +87,9 @@
   .card .acc { margin-top: 8px; display: flex; align-items: center; gap: 14px; }
   a.ir { background: var(--brand); color: #fff; font-weight: 700; font-size: 13px; letter-spacing: .04em; padding: 5px 16px; border-radius: 6px; text-decoration: none; }
   a.ir:hover { background: #095a31; }
+  /* Compra Ágil ya visitada con el botón IR (se recuerda en este navegador) */
+  a.ir.visitada { background: #6d28d9; }
+  a.ir.visitada:hover { background: #5b21b6; }
   .linkbtn { background: none; border: 0; padding: 0; color: var(--brand); font: inherit; font-size: 13px; cursor: pointer; }
   .linkbtn:hover { text-decoration: underline; }
   .det { grid-column: 1 / -1; background: #fafbf9; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; font-size: 13px; }
@@ -674,6 +677,21 @@ async function verDetalle(btn, codigo) {
     </div>`;
   card.appendChild(div);
 }
+// Compras Ágiles visitadas con el botón IR: { codigo: fecha en ms }. Se guardan en este navegador
+// y se olvidan a los 90 días (para entonces la compra ya cerró) para que no crezca sin límite.
+const VISITADAS_KEY = 'ca-visitadas', VISITADAS_DIAS = 90;
+const visitadas = (() => {
+  let v = {}; try { v = JSON.parse(localStorage.getItem(VISITADAS_KEY) || '{}') || {}; } catch {}
+  const limite = Date.now() - VISITADAS_DIAS * 864e5;
+  for (const k of Object.keys(v)) if (!(v[k] > limite)) delete v[k];
+  return v;
+})();
+function marcarVisitada(a) {
+  visitadas[a.dataset.ir] = Date.now();
+  try { localStorage.setItem(VISITADAS_KEY, JSON.stringify(visitadas)); } catch {}
+  a.classList.add('visitada');
+  a.title = 'Ya la visitaste · Abrir en Compra Ágil de Mercado Público';
+}
 function buscar() {
   guardarFiltros();
   const res = resCompras = filtrarCompras();
@@ -695,7 +713,7 @@ function buscar() {
           <span class="tag">Publicada ${fmtFecha(c.fechaPublicacion)}</span>
           ${c.documentos ? `<span class="tag">${c.documentos} adjunto${c.documentos > 1 ? 's' : ''}</span>` : ''}
         </div>
-        <div class="acc"><a class="ir" href="https://compra-agil.mercadopublico.cl/resumen-cotizacion/${encodeURIComponent(c.codigo)}" target="_blank" rel="noopener" title="Abrir en Compra Ágil de Mercado Público">IR</a><button class="linkbtn" data-cod="${esc(c.codigo)}">Ver detalle</button></div>
+        <div class="acc"><a class="ir${visitadas[c.codigo] ? ' visitada' : ''}" data-ir="${esc(c.codigo)}" href="https://compra-agil.mercadopublico.cl/resumen-cotizacion/${encodeURIComponent(c.codigo)}" target="_blank" rel="noopener" title="${visitadas[c.codigo] ? 'Ya la visitaste · ' : ''}Abrir en Compra Ágil de Mercado Público">IR</a><button class="linkbtn" data-cod="${esc(c.codigo)}">Ver detalle</button></div>
       </div>
       <div class="right">
         ${c.montoCLP != null ? `<div class="monto">${clp(c.montoCLP)}</div>` : '<div class="monto na">Monto no informado</div>'}
@@ -704,6 +722,8 @@ function buscar() {
       </div>
     </article>`).join('') : `<div class="empty">${COMPRAS.length ? 'No hay Compras Ágiles abiertas con estos filtros.' : 'Aún no hay datos. La primera actualización en GitHub tarda entre 10 y 20 minutos.'}</div>`;
   document.querySelectorAll('.linkbtn[data-cod]').forEach((b) => b.onclick = () => verDetalle(b, b.dataset.cod));
+  // Clic normal o con la rueda del mouse (abrir en pestaña nueva) marca la compra como visitada
+  document.querySelectorAll('a.ir[data-ir]').forEach((a) => { a.onclick = a.onauxclick = () => marcarVisitada(a); });
   paginador($('#pager'), res.length, page, (p) => { page = p; buscar(); });
 }
 
